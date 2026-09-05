@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { invitation, mapsUrl } from "@/content/invitation";
 import { SectionHeading } from "@/components/invitation/SectionHeading";
 
@@ -17,6 +18,16 @@ export function VenueSection() {
         {[invitation.venues.ceremony, invitation.venues.reception].map(
           (venue) => (
             <div key={venue.name}>
+              <div className="relative mb-6 aspect-4/3 overflow-hidden bg-accent-soft">
+                <Image
+                  src={venue.image.src}
+                  alt={venue.image.alt}
+                  fill
+                  unoptimized
+                  sizes="(max-width: 768px) 100vw, 28rem"
+                  className="object-cover"
+                />
+              </div>
               <p className="text-xs tracking-[0.22em] text-accent uppercase">
                 {venue.title}
               </p>

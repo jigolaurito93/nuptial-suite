@@ -23,12 +23,20 @@ export const invitation = {
       name: "Don Bosco Chapel on the Hill",
       address: "Nasugbu, Batangas, Philippines",
       mapsQuery: "Don Bosco Chapel on the Hill Nasugbu Philippines",
+      image: {
+        src: "/images/chapel-on-hill-img.png",
+        alt: "Don Bosco Chapel on the Hill in Nasugbu",
+      },
     },
     reception: {
       title: "Reception",
       name: "Antonio's Restaurant",
       address: "Neogan, Tagaytay City, Cavite, Philippines",
       mapsQuery: "Antonio's Restaurant Neogan Tagaytay Cavite",
+      image: {
+        src: "/images/antonios-img.png",
+        alt: "Dining room at Antonio's Restaurant in Tagaytay",
+      },
     },
   },
   hotels: [
