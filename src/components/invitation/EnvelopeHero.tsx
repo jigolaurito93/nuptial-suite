@@ -11,6 +11,7 @@ import {
   useSpring,
   useTransform,
 } from "motion/react";
+import Image from "next/image";
 import { invitation } from "@/content/invitation";
 
 type EnvelopeHeroProps = {
@@ -38,8 +39,11 @@ const CARD_WIDTH_RATIO = 0.84;
 const CARD_HEIGHT_RATIO = 0.63;
 const CARD_MAX_WIDTH = 620;
 const CARD_SETTLED_SCALE = 1.07;
+const CARD_SETTLED_SCALE_MOBILE = 1;
 const CARD_SETTLED_ROTATE = 3;
 const CARD_SETTLED_X = 20;
+const CARD_SETTLED_X_MOBILE = 10;
+const CARD_MOBILE_MAX = 640;
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -200,6 +204,8 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
   // past its layout size, and settles 3deg clockwise.
   const slotHeight = useMotionValue(140);
   const restScale = useMotionValue(0.48);
+  const settledScale = useMotionValue(CARD_SETTLED_SCALE);
+  const settledShift = useMotionValue(CARD_SETTLED_X);
   const cardY = useTransform([progress, slotHeight], (latest: number[]) => {
     const [value, height] = latest;
     const lifted = -1.25 * height;
@@ -210,26 +216,15 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
         : mapRange(value, CARD_LIFT[1], CARD_GROW[1], lifted, settled);
     return `calc(-50% + ${Math.round(travel)}px)`;
   });
-  const cardX = useTransform(progress, (value) => {
+  const cardX = useTransform([progress, settledShift], (latest: number[]) => {
+    const [value, shiftMax] = latest;
     if (value <= CARD_LIFT[1]) return "-50%";
-    const shift = mapRange(
-      value,
-      CARD_LIFT[1],
-      CARD_GROW[1],
-      0,
-      CARD_SETTLED_X,
-    );
+    const shift = mapRange(value, CARD_LIFT[1], CARD_GROW[1], 0, shiftMax);
     return `calc(-50% + ${Math.round(shift)}px)`;
   });
   const cardRotate = useTransform(progress, (value) => {
     if (value <= CARD_LIFT[1]) return 0;
-    return mapRange(
-      value,
-      CARD_LIFT[1],
-      CARD_GROW[1],
-      0,
-      CARD_SETTLED_ROTATE,
-    );
+    return mapRange(value, CARD_LIFT[1], CARD_GROW[1], 0, CARD_SETTLED_ROTATE);
   });
   // Depth only starts climbing at the top of the lift, where the card is clear
   // of the front panel, so it never visibly pops through the envelope.
@@ -242,10 +237,13 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
     value > CARD_LIFT[1] ? 8 : 2,
   );
   const growth = useTransform(progress, CARD_GROW, [0, 1], { ease: easeInOut });
-  const cardScale = useTransform([growth, restScale], (latest: number[]) => {
-    const [amount, rest] = latest;
-    return rest + amount * (CARD_SETTLED_SCALE - rest);
-  });
+  const cardScale = useTransform(
+    [growth, restScale, settledScale],
+    (latest: number[]) => {
+      const [amount, rest, target] = latest;
+      return rest + amount * (target - rest);
+    },
+  );
   const cardShadow = useTransform(
     progress,
     [CARD_LIFT[0], CARD_GROW[1]],
@@ -291,8 +289,12 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
       if (!stageWidth) return;
 
       const slotWidth = stageWidth * CARD_WIDTH_RATIO;
-      const room = Math.min(window.innerWidth * 0.9, CARD_MAX_WIDTH);
+      const mobile = window.innerWidth < CARD_MOBILE_MAX;
+      const roomRatio = mobile ? 0.82 : 0.9;
+      const room = Math.min(window.innerWidth * roomRatio, CARD_MAX_WIDTH);
       restScale.set(clamp(slotWidth / room, 0.38, 1));
+      settledScale.set(mobile ? CARD_SETTLED_SCALE_MOBILE : CARD_SETTLED_SCALE);
+      settledShift.set(mobile ? CARD_SETTLED_X_MOBILE : CARD_SETTLED_X);
       slotHeight.set(node.offsetHeight * CARD_HEIGHT_RATIO);
     }
 
@@ -300,10 +302,12 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
 
     const observer = new ResizeObserver(measure);
     observer.observe(stage);
+    window.addEventListener("resize", measure);
     return () => {
       observer.disconnect();
+      window.removeEventListener("resize", measure);
     };
-  }, [restScale, slotHeight]);
+  }, [restScale, settledScale, settledShift, slotHeight]);
 
   useMotionValueEvent(progress, "change", (value) => {
     const opened = value >= 0.72;
@@ -486,7 +490,14 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
                       }
                 }
               >
-                <img src="/kb-seal.svg" alt="" className="envelope-seal-img" />
+                <Image
+                  src="/kb-seal.svg"
+                  alt=""
+                  fill
+                  unoptimized
+                  sizes="7.25rem"
+                  className="envelope-seal-img"
+                />
               </motion.div>
             </div>
           </motion.div>

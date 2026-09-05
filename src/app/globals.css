@@ -325,9 +325,15 @@ body {
   position: absolute;
   top: 62.5%;
   left: 50%;
-  width: min(90vw, 38.75rem);
+  width: min(82vw, 38.75rem);
   aspect-ratio: 84 / 39.4;
   will-change: transform;
+}
+
+@media (min-width: 40rem) {
+  .envelope-letter {
+    width: min(90vw, 38.75rem);
+  }
 }
 
 .letter-shadow {
