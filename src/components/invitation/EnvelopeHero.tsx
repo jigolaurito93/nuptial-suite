@@ -495,7 +495,7 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
                   alt=""
                   fill
                   unoptimized
-                  sizes="7.25rem"
+                  sizes="(min-width: 64rem) 7.25rem, 5rem"
                   className="envelope-seal-img"
                 />
               </motion.div>

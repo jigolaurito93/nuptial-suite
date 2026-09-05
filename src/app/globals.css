@@ -222,8 +222,9 @@ body {
    viewport, which is where the enlarged card needs to land. */
 .envelope-copy {
   position: absolute;
-  top: clamp(4rem, 16vh, 8.5rem);
+  top: auto;
   right: 1.5rem;
+  bottom: calc(50% + min(21rem, 74vw) / 3.2 + 1.25rem);
   left: 1.5rem;
   text-align: center;
 }
@@ -245,9 +246,20 @@ body {
   perspective-origin: 50% 44%;
 }
 
+@media (min-width: 48rem) {
+  .envelope-copy {
+    bottom: calc(50% + min(30rem, 68vw) / 3.2 + 1.25rem);
+  }
+
+  .envelope-stage {
+    width: min(30rem, 68vw);
+  }
+}
+
 @media (min-width: 64rem) {
   .envelope-copy {
     top: clamp(6rem, 20vh, 11rem);
+    bottom: auto;
   }
 
   .envelope-stage {
@@ -636,17 +648,30 @@ body {
   top: 59.5%;
   left: 50%;
   z-index: 6;
-  width: 7.25rem;
-  height: 7.25rem;
-  margin: -3.625rem 0 0 -3.625rem;
+  width: 5rem;
+  height: 5rem;
+  margin: -2.5rem 0 0 -2.5rem;
   transform: translateZ(12px);
 }
 
 .envelope-seal {
   position: relative;
-  width: 7.25rem;
-  height: 7.25rem;
+  width: 5rem;
+  height: 5rem;
   will-change: transform, opacity;
+}
+
+@media (min-width: 64rem) {
+  .envelope-seal-anchor {
+    width: 7.25rem;
+    height: 7.25rem;
+    margin: -3.625rem 0 0 -3.625rem;
+  }
+
+  .envelope-seal {
+    width: 7.25rem;
+    height: 7.25rem;
+  }
 }
 
 .envelope-seal-img {
