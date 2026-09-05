@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 900" width="100%" height="100%">
+  <defs>
+    <!-- Multi-stop Realistic Gold Metallic Background -->
+    <linearGradient id="heavyGoldBg" x1="10%" y1="0%" x2="90%" y2="100%">
+      <stop offset="0%" stop-color="#EAD196" />
+      <stop offset="25%" stop-color="#C5A85A" />
+      <stop offset="45%" stop-color="#FFF3CD" />
+      <stop offset="55%" stop-color="#F3E5AB" />
+      <stop offset="75%" stop-color="#AA8B32" />
+      <stop offset="100%" stop-color="#785917" />
+    </linearGradient>
+
+    <!-- Ultra-Crisp 3D Stamping Emboss Filter -->
+    <filter id="intricate-emboss" x="-30%" y="-30%" width="160%" height="160%">
+      <!-- Tight blur for intricate vector line clarity -->
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.8" result="subtle-blur" />
+      
+      <!-- Specular lighting to define sharp metallic edges -->
+      <feSpecularLighting in="subtle-blur" surfaceScale="5.5" specularConstant="1.6" specularExponent="18" lighting-color="#FFFFE8" result="glint">
+        <feDistantLight azimuth="135" elevation="42" />
+      </feSpecularLighting>
+      
+      <!-- Keeps reflections directly constrained to the thin linework paths -->
+      <feComposite in="glint" in2="SourceAlpha" operator="in" result="highlight-mask"/>
+      
+      <!-- Crisp micro shadow underneath lines -->
+      <feOffset in="subtle-blur" dx="-2" dy="-2" result="drop-shadow"/>
+      
+      <feMerge>
+        <feMergeNode in="drop-shadow" />
+        <feMergeNode in="SourceGraphic" />
+        <feMergeNode in="highlight-mask" />
+      </feMerge>
+    </filter>
+
+    <!-- Linework Shimmer Gradient -->
+    <linearGradient id="shimmerGoldLines" x1="100%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#FFF8DC" />
+      <stop offset="30%" stop-color="#E5C158" />
+      <stop offset="70%" stop-color="#9A741F" />
+      <stop offset="100%" stop-color="#5C4008" />
+    </linearGradient>
+  </defs>
+
+  <!-- Detailed Engraved Pattern Base -->
+  <g filter="url(#intricate-emboss)" stroke="url(#shimmerGoldLines)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    
+    <!-- ==================== CENTRAL HERO PEONY ==================== -->
+    <g transform="translate(480, 460)" stroke-width="4">
+      <!-- Deepest Outer Guard Petals -->
+      <path d="M-110,30 C-150,-30 -80,-130 0,-120 C80,-130 160,-50 120,40 C140,110 50,160 0,130 C-60,160 -150,100 -110,30 Z" stroke-width="5" />
+      
+      <!-- Secondary Overlapping Mid-Petals -->
+      <path d="M-90,-10 C-110,-60 -40,-95 0,-80 C40,-95 110,-55 90,-5 C100,50 40,95 0,75 C-50,95 -100,45 -90,-10 Z" />
+      <path d="M-75,15 C-90,-25 -30,-65 0,-55 C30,-65 80,-30 70,20 C75,55 30,75 0,60 C-30,75 -75,50 -75,15 Z" stroke-width="3.5" />
+      
+      <!-- Intricate Tight Ruffled Core Layers -->
+      <path d="M-45,-5 C-55,-35 -15,-50 0,-35 C15,-50 50,-35 40,-5 C45,20 20,45 0,35 C-20,45 -45,15 -45,-5 Z" stroke-width="3" />
+      <path d="M-25,-8 C-30,-25 -10,-35 0,-25 C10,-35 30,-25 25,-8 C28,10 12,25 0,20 C-12,25 -28,8 -25,-8 Z" stroke-width="2.5" />
+      <path d="M-12,-3 C-15,-15 -5,-20 0,-15 C5,-20 15,-15 12,-3 C12,5 5,12 0,8 C-5,12 -15,5 -12,-3 Z" stroke-width="2" />
+
+      <!-- Fine Engraved Shading Lines (Dense Sketch Details) -->
+      <!-- Top Left Guard Shading -->
+      <path d="M-95,-35 C-80,-45 -70,-40 -65,-30" stroke-width="1.5" opacity="0.75" />
+      <path d="M-100,-25 C-85,-35 -75,-30 -70,-20" stroke-width="1.2" opacity="0.75" />
+      <path d="M-105,-15 C-90,-25 -80,-20 -75,-10" stroke-width="1" opacity="0.7" />
+      <!-- Right Guard Shading -->
+      <path d="M100,10 C85,5 75,15 70,25" stroke-width="1.5" opacity="0.75" />
+      <path d="M105,22 C90,17 80,27 75,37" stroke-width="1.2" opacity="0.75" />
+      <!-- Base Ruffle Creases -->
+      <path d="M-40,110 C-30,90 -10,85 -5,75" stroke-width="1.5" opacity="0.8" />
+      <path d="M40,110 C30,90 10,85 5,75" stroke-width="1.5" opacity="0.8" />
+      <path d="M-20,125 C-15,105 0,100 0,90" stroke-width="1.2" opacity="0.8" />
+      <!-- Mid-Petal Folds -->
+      <path d="M-55,-65 C-45,-55 -40,-65 -35,-55" stroke-width="1.2" />
+      <path d="M55,-65 C45,-55 40,-65 35,-55" stroke-width="1.2" />
+    </g>
+
+    <!-- ==================== TOP RIGHT BLOSSOMING PEONY ==================== -->
+    <g transform="translate(670, 290)" stroke-width="3.8">
+      <!-- Outermost Ring -->
+      <path d="M-80,-20 C-95,-70 -30,-110 20,-90 C70,-110 110,-50 90,10 C100,60 50,110 0,90 C-50,110 -90,40 -80,-20 Z" stroke-width="4.5" />
+      <!-- Inward Folds -->
+      <path d="M-60,-15 C-70,-50 -20,-80 15,-65 C50,-80 80,-40 65,5 C75,40 35,75 0,60 C-35,75 -70,30 -60,-15 Z" />
+      <path d="M-40,-10 C-45,-35 -10,-55 10,-45 C30,-55 55,-25 45,5 C50,25 25,50 0,40 C-25,50 -45,20 -40,-10 Z" stroke-width="2.8" />
+      <path d="M-20,-5 C-22,-22 -5,-35 5,-28 C15,-35 32,-15 25,5 C28,18 12,32 0,25 C-12,32 -25,15 -20,-5 Z" stroke-width="2" />
+      
+      <!-- Internal Contour Micro-Hatching -->
+      <path d="M-75,-45 C-60,-55 -55,-45 -50,-40" stroke-width="1.2" opacity="0.7" />
+      <path d="M-70,-55 C-58,-62 -53,-52 -48,-48" stroke-width="1" opacity="0.7" />
+      <path d="M75,-25 C60,-35 55,-25 50,-20" stroke-width="1.2" opacity="0.7" />
+      <path d="M80,-15 C65,-25 60,-15 55,-10" stroke-width="1.2" opacity="0.7" />
+    </g>
+
+    <!-- ==================== LOWER LEFT DENSE PEONY BUD ==================== -->
+    <g transform="translate(290, 600)" stroke-width="4">
+      <!-- Tightly packed outer layers -->
+      <path d="M-65,0 C-85,-40 -40,-100 15,-80 C70,-100 100,-40 75,10 C85,60 35,90 -10,80 C-55,90 -85,40 -65,0 Z" stroke-width="4.8" />
+      <!-- Cupped structure -->
+      <path d="M-45,-5 C-60,-35 -25,-75 10,-60 C45,-75 70,-35 55,5 C60,40 25,65 -5,55 C-40,65 -60,25 -45,-5 Z" />
+      <!-- Swirling Core lines -->
+      <path d="M-25,-5 C-35,-25 -15,-50 5,-40 C25,-50 45,-25 35,5 C38,25 15,45 -5,35 C-25,45 -35,15 -25,-5 Z" stroke-width="2.8" />
+      <path d="M-10,-5 C-15,-15 -5,-30 5,-25 C15,-30 25,-15 20,2 C22,12 10,22 -5,18 C-15,22 -20,10 -10,-5 Z" stroke-width="1.8" />
+      <!-- Bud Hatching -->
+      <path d="M-5,72 C-15,55 -25,40 -30,20" stroke-width="1.2" opacity="0.8"/>
+      <path d="M15,70 C5,55 -5,40 -10,20" stroke-width="1.2" opacity="0.8"/>
+    </g>
+
+    <!-- ==================== SECONDARY BUD (TOP LEFT EXTENSION) ==================== -->
+    <g transform="translate(220, 280)" stroke-width="3.5">
+      <!-- Base Sepals/Leaves holding the bud -->
+      <path d="M-30,40 C-50,10 -40,-20 -20,-40 C0,-60 30,-50 40,-20 C50,10 30,40 0,45" stroke-width="4.5" />
+      <!-- Overlapping Petals peeking out -->
+      <path d="M-20,-40 C-15,-65 15,-65 25,-35 C35,-5 15,25 0,35" />
+      <path d="M-5,-45 C5,-65 25,-55 20,-30" stroke-width="2.5" />
+      <path d="M-25,-15 C-15,-25 -10,-35 5,-30" stroke-width="1.5" />
+    </g>
+
+    <!-- ==================== RICH LEAF SYSTEMS & VEINS ==================== -->
+    <!-- Textured Leaf Set 1 (Extending Left) -->
+    <g stroke-width="3.8">
+      <path d="M190,440 C90,410 70,320 70,320 C70,320 140,300 230,370 Z" />
+      <path d="M70,320 C120,340 170,365 230,370" stroke-width="1.8" /> <!-- Primary Vein -->
+      <path d="M110,335 C120,325 135,320 150,315" stroke-width="1.2" opacity="0.8"/> <!-- Side Veins -->
+      <path d="M140,350 C155,340 170,335 185,330" stroke-width="1.2" opacity="0.8"/>
+      
+      <path d="M210,540 C90,580 50,670 50,670 C50,670 120,700 220,620 Z" />
+      <path d="M50,670 C100,650 150,635 220,620" stroke-width="1.8" />
+      <path d="M90,655 C110,670 130,680 155,690" stroke-width="1.2" opacity="0.8"/>
+    </g>
+
+    <!-- Textured Leaf Set 2 (Extending Top Center) -->
+    <g stroke-width="3.8">
+      <path d="M460,260 C420,140 460,50 460,50 C460,50 530,90 520,220 Z" />
+      <path d="M460,50 C475,100 485,150 520,220" stroke-width="1.8" />
+      <path d="M470,95 C460,110 450,120 440,130" stroke-width="1.2" opacity="0.8"/>
+      <path d="M480,135 C470,150 460,165 450,175" stroke-width="1.2" opacity="0.8"/>
+
+      <path d="M550,240 C550,120 620,40 620,40 C620,40 670,100 600,210 Z" />
+      <path d="M620,40 C615,90 610,140 600,210" stroke-width="1.8" />
+    </g>
+
+    <!-- Textured Leaf Set 3 (Extending Right / Bottom Right) -->
+    <g stroke-width="3.8">
+      <path d="M760,400 C870,410 930,340 930,340 C930,340 890,280 790,320 Z" />
+      <path d="M930,340 C880,340 830,335 790,320" stroke-width="1.8" />
+      
+      <path d="M720,530 C850,580 890,680 890,680 C890,680 810,700 700,610 Z" />
+      <path d="M890,680 C830,650 770,630 700,610" stroke-width="1.8" />
+      <path d="M840,655 C830,670 815,685 795,700" stroke-width="1.2" opacity="0.8"/>
+    </g>
+
+    <!-- ==================== CASCADING FILLER FLOWER SPRAYS ==================== -->
+    <!-- Intricate Wildflower Branches (Upper Right) -->
+    <g stroke-width="2.5">
+      <path d="M620,180 C680,130 750,100 810,80" stroke-width="3.5" />
+      <!-- Blossom Node 1 -->
+      <path d="M700,130 C690,110 720,100 710,120" />
+      <circle cx="705" cy="115" r="4.5" fill="url(#heavyGoldBg)" />
+      <!-- Blossom Node 2 -->
+      <path d="M750,110 C740,90 770,80 760,100" />
+      <circle cx="755" cy="95" r="5.5" fill="url(#heavyGoldBg)" />
+      <circle cx="745" cy="90" r="3" fill="url(#heavyGoldBg)" />
+      <!-- Blossom Node 3 -->
+      <path d="M800,85 C790,65 820,55 810,75" />
+      <circle cx="805" cy="70" r="5" fill="url(#heavyGoldBg)" />
+      <circle cx="820" cy="65" r="3.5" fill="url(#heavyGoldBg)" />
+    </g>
+
+    <!-- Intricate Wildflower Branches (Lower Left / Drooping) -->
+    <g stroke-width="2.5">
+      <path d="M380,680 C360,740 320,810 260,850" stroke-width="3.5" />
+      <circle cx="340" cy="730" r="5" fill="url(#heavyGoldBg)" />
+      <circle cx="320" cy="755" r="4" fill="url(#heavyGoldBg)" />
+      <circle cx="290" cy="800" r="4.5" fill="url(#heavyGoldBg)" />
+      <circle cx="265" cy="835" r="3.5" fill="url(#heavyGoldBg)" />
+    </g>
+  </g>
+</svg>

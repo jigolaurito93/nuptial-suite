@@ -619,10 +619,10 @@ body {
   pointer-events: none;
   position: absolute;
   inset: 0;
-  background: url("/envelope-flap-floral.svg") center 8% / 92% auto no-repeat;
-  filter: drop-shadow(0 1px 0 rgba(255, 244, 210, 0.45))
-    drop-shadow(0 -1px 0 rgba(48, 30, 4, 0.35));
-  opacity: 0.88;
+  background: url("/flap-pattern.svg") center top / 100% 100% no-repeat;
+  filter: drop-shadow(0 1px 0 rgba(255, 244, 210, 0.35))
+    drop-shadow(0 -1px 0 rgba(48, 30, 4, 0.28));
+  opacity: 0.78;
 }
 
 /* Only seen once the flap has folded back, by which point the hinge is at the
