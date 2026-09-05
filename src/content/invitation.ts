@@ -10,7 +10,7 @@ export const invitation = {
   weddingTimeLabel: "3:00 PM",
   rsvpByLabel: "8 January 2028",
   saveTheDateEyebrow: "Save the date",
-  envelopeHint: "Click the envelope to open",
+  envelopeHint: "Scroll to open the envelope",
   message:
     "With joyful hearts, we invite you to celebrate our wedding day with us.",
   heroImage: {

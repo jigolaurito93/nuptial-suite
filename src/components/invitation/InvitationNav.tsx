@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { invitation } from "@/content/invitation";
 
 const links = [
@@ -48,33 +49,38 @@ export function InvitationNav({ visible }: InvitationNavProps) {
     return () => window.removeEventListener("scroll", onScroll);
   }, [visible]);
 
-  if (!visible) return null;
-
   return (
-    <header
-      className={`sticky top-0 z-30 border-b border-border/80 bg-background/90 backdrop-blur-md transition-transform duration-300 ${
-        hidden ? "pointer-events-none -translate-y-full" : "translate-y-0"
-      }`}
-    >
-      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-3">
-        <a
-          href="#save-the-date"
-          className="font-display text-lg tracking-tight text-foreground"
+    <AnimatePresence>
+      {visible ? (
+        <motion.header
+          key="invitation-nav"
+          initial={{ y: "-100%" }}
+          animate={{ y: hidden ? "-100%" : 0 }}
+          exit={{ y: "-100%" }}
+          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+          className="sticky top-0 z-30 border-b border-border/80 bg-background/90 backdrop-blur-md"
         >
-          {invitation.couple.displayNames}
-        </a>
-        <nav className="flex max-w-full flex-wrap items-center gap-x-4 gap-y-2 text-xs tracking-wide text-muted uppercase">
-          {links.map((link) => (
+          <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-3">
             <a
-              key={link.href}
-              href={link.href}
-              className="transition hover:text-foreground"
+              href="#save-the-date"
+              className="font-display text-lg tracking-tight text-foreground"
             >
-              {link.label}
+              {invitation.couple.displayNames}
             </a>
-          ))}
-        </nav>
-      </div>
-    </header>
+            <nav className="flex max-w-full flex-wrap items-center gap-x-4 gap-y-2 text-xs tracking-wide text-muted uppercase">
+              {links.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="transition hover:text-foreground"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </nav>
+          </div>
+        </motion.header>
+      ) : null}
+    </AnimatePresence>
   );
 }

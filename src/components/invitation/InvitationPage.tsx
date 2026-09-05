@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { invitation } from "@/content/invitation";
 import { AudioControl } from "@/components/invitation/AudioControl";
 import { EnvelopeHero } from "@/components/invitation/EnvelopeHero";
@@ -21,89 +21,53 @@ import {
 import { VenueSection } from "@/components/invitation/sections/VenueSection";
 
 export function InvitationPage() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isOpening, setIsOpening] = useState(false);
+  const [opened, setOpened] = useState(false);
   const [muted, setMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => {
-    const root = document.documentElement;
-    const body = document.body;
-
-    if (!isOpen) {
-      root.classList.add("scroll-locked");
-      body.classList.add("scroll-locked");
-    } else {
-      root.classList.remove("scroll-locked");
-      body.classList.remove("scroll-locked");
-    }
-
-    return () => {
-      root.classList.remove("scroll-locked");
-      body.classList.remove("scroll-locked");
-    };
-  }, [isOpen]);
+  const onOpenedChange = useCallback((next: boolean) => {
+    setOpened(next);
+  }, []);
 
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio || !isOpen) return;
+    if (!audio) return;
     audio.muted = muted;
-    if (!muted) {
+    if (opened && !muted) {
       void audio.play().catch(() => {
         // Missing file or autoplay restrictions — fail silently.
       });
     } else {
       audio.pause();
     }
-  }, [isOpen, muted]);
-
-  function handleOpen() {
-    if (isOpen || isOpening) return;
-    setIsOpening(true);
-
-    window.setTimeout(() => {
-      setIsOpen(true);
-      setIsOpening(false);
-      window.scrollTo({ top: 0, behavior: "auto" });
-    }, 900);
-  }
+  }, [opened, muted]);
 
   return (
     <div className="relative flex min-h-dvh flex-col bg-background text-foreground">
       <audio ref={audioRef} src={invitation.audioSrc} loop preload="none" />
 
-      {!isOpen ? (
-        <EnvelopeHero
-          isOpening={isOpening}
-          onOpen={handleOpen}
-          eyebrow={invitation.saveTheDateEyebrow}
-          names={invitation.couple.displayNames}
-          hint={invitation.envelopeHint}
-        />
-      ) : null}
+      <EnvelopeHero onOpenedChange={onOpenedChange} />
 
-      {isOpen ? (
-        <div className="relative z-10 flex flex-1 flex-col">
-          <InvitationNav visible />
-          <main className="flex-1">
-            <SaveTheDateSection />
-            <CountdownSection />
-            <VenueSection />
-            <ProgramSection />
-            <EntourageSection />
-            <DressCodeSection />
-            <GallerySection />
-            <GiftGuideSection />
-            <RsvpSection />
-            <FaqsSection />
-            <SeeYouThereSection />
-          </main>
-          <InvitationFooter />
-        </div>
-      ) : null}
+      <div className="relative z-10 flex flex-1 flex-col">
+        <InvitationNav visible={opened} />
+        <main className="flex-1">
+          <SaveTheDateSection />
+          <CountdownSection />
+          <VenueSection />
+          <ProgramSection />
+          <EntourageSection />
+          <DressCodeSection />
+          <GallerySection />
+          <GiftGuideSection />
+          <RsvpSection />
+          <FaqsSection />
+          <SeeYouThereSection />
+        </main>
+        <InvitationFooter />
+      </div>
 
       <AudioControl
-        visible={isOpen}
+        visible={opened}
         muted={muted}
         onToggle={() => setMuted((value) => !value)}
       />

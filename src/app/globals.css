@@ -11,6 +11,10 @@
   --orb-a: #c5d0c3;
   --orb-b: #d8cfc3;
   --orb-c: #c9d4d8;
+
+  /* Grayscale fractal noise, used at very low opacity to give the paper a
+     tooth. Inline so the hero never waits on a texture download. */
+  --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)'/%3E%3C/svg%3E");
 }
 
 @theme inline {
@@ -23,6 +27,7 @@
   --color-surface: var(--surface);
   --font-sans: "Outfit Variable", system-ui, sans-serif;
   --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-script: "Great Vibes", "Segoe Script", cursive;
 }
 
 body {
@@ -33,6 +38,10 @@ body {
 
 .font-display {
   font-family: var(--font-display);
+}
+
+.font-script {
+  font-family: var(--font-script);
 }
 
 .invitation-section {
@@ -97,79 +106,505 @@ body {
   .motion-orbs span {
     animation: none;
   }
+}
 
-  .envelope-flap,
-  .envelope-seal-fade {
-    transition: none !important;
+/* ---------------------------------------------------------------------------
+   Envelope hero
+
+   The sequence is driven entirely by scroll position in EnvelopeHero.tsx. The
+   scene is tall and its contents stick, so scene height is what sets the pace:
+   the taller it is, the more scrolling each beat takes.
+   --------------------------------------------------------------------------- */
+
+.envelope-scene {
+  height: 680vh;
+  /* The card's cast shadow reaches past the stage at full size. Clip rather
+     than hide, so this never becomes a scroll container and breaks the sticky
+     child below. */
+  overflow-x: clip;
+}
+
+@media (max-width: 40rem) {
+  .envelope-scene {
+    height: 580vh;
   }
 }
 
+.envelope-sticky {
+  position: sticky;
+  top: 0;
+  display: grid;
+  height: 100dvh;
+  place-items: center;
+}
+
+/* Copy is positioned rather than stacked so the stage sits dead centre in the
+   viewport, which is where the enlarged card needs to land. */
+.envelope-copy {
+  position: absolute;
+  top: clamp(2.5rem, 11vh, 6.5rem);
+  right: 1.5rem;
+  left: 1.5rem;
+  text-align: center;
+}
+
+.envelope-hint {
+  position: absolute;
+  right: 1.5rem;
+  bottom: clamp(2rem, 8vh, 4.5rem);
+  left: 1.5rem;
+  text-align: center;
+}
+
+.envelope-stage {
+  position: relative;
+  width: min(21rem, 74vw);
+  aspect-ratio: 1.6 / 1;
+  perspective: 1400px;
+  perspective-origin: 50% 44%;
+}
+
+.envelope-shadow-halo {
+  position: absolute;
+  inset: -18% -14% -22%;
+  border-radius: 1.2rem;
+  background: radial-gradient(
+    ellipse at 50% 58%,
+    rgba(48, 38, 24, 0.22) 0%,
+    rgba(48, 38, 24, 0.1) 42%,
+    transparent 72%
+  );
+  filter: blur(28px);
+}
+
+.envelope-shadow {
+  position: absolute;
+  right: 2%;
+  bottom: -12%;
+  left: 2%;
+  height: 26%;
+  border-radius: 100%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(48, 38, 24, 0.42) 0%,
+    rgba(48, 38, 24, 0.16) 40%,
+    transparent 74%
+  );
+  filter: blur(14px);
+}
+
+/* Back to front, the stack is: backing (0px), card (1px, rising to 84px once it
+   is clear), pocket (4px), flap (6px, dropping to -6px once folded back). Order
+   comes from translateZ rather than z-index, because inside a 3D rendering
+   context browsers sort by depth and treat z-index only as a tiebreak between
+   coplanar layers.
+
+   Nothing on this element may set filter, clip-path, opacity, mask, blend mode
+   or a non-visible overflow. Each of those forces transform-style back to flat,
+   which collapses that ordering. */
 .envelope {
   position: relative;
-  width: min(18rem, 70vw);
-  aspect-ratio: 4 / 3;
-  cursor: pointer;
-  perspective: 800px;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
 }
 
-.envelope-body {
+/* Layer 1: the backing, which sets the envelope's overall size. */
+.envelope-back {
   position: absolute;
   inset: 0;
-  border-radius: 0.35rem;
-  background: linear-gradient(160deg, #f3efe8 0%, #e8e2d8 100%);
-  border: 1px solid var(--border);
-  box-shadow: 0 18px 40px rgba(28, 28, 26, 0.12);
+  border-radius: 0.3rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42), transparent 32%),
+    linear-gradient(168deg, #f9f2e8 0%, #eddfca 54%, #e2d1b9 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(196, 176, 154, 0.55),
+    0 4px 10px rgba(48, 38, 24, 0.1),
+    0 18px 28px -10px rgba(48, 38, 24, 0.28),
+    0 36px 48px -16px rgba(48, 38, 24, 0.22);
+  transform: translateZ(0);
 }
 
-.envelope-pocket {
+/* Layer 2: laid out at the size the card ends at, then scaled down to the
+   envelope slot. Scaling never goes above 1, so the type stays a native
+   raster instead of a stretched bitmap. The box is centred on the slot
+   (62.5% = 31% top + half of 63% height). */
+.envelope-letter {
   position: absolute;
-  inset: auto 0 0 0;
-  height: 62%;
-  background: linear-gradient(180deg, #ebe5db 0%, #ddd5c8 100%);
-  clip-path: polygon(0 35%, 50% 0, 100% 35%, 100% 100%, 0 100%);
-  border-bottom-left-radius: 0.35rem;
-  border-bottom-right-radius: 0.35rem;
+  top: 62.5%;
+  left: 50%;
+  width: min(90vw, 38.75rem);
+  aspect-ratio: 84 / 39.4;
+  will-change: transform;
 }
 
+.letter-shadow {
+  position: absolute;
+  inset: 0;
+  border-radius: 0.14rem;
+  box-shadow:
+    0 28px 52px -14px rgba(48, 38, 24, 0.5),
+    0 10px 20px -8px rgba(48, 38, 24, 0.32);
+}
+
+.letter-card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.28rem;
+  padding: 1.35rem 1.6rem;
+  border: 1px solid #e6d8c5;
+  border-radius: 0.18rem;
+  background:
+    radial-gradient(
+      ellipse at 50% 0%,
+      rgba(122, 138, 120, 0.08),
+      transparent 46%
+    ),
+    radial-gradient(
+      ellipse at 50% 100%,
+      rgba(196, 176, 154, 0.14),
+      transparent 42%
+    ),
+    linear-gradient(172deg, #fffdf9 0%, #fbf5ec 56%, #f3eade 100%);
+  box-shadow:
+    inset 0 0 0 5px rgba(250, 245, 236, 0.9),
+    inset 0 0 0 6px rgba(214, 197, 173, 0.5);
+}
+
+.letter-frame {
+  pointer-events: none;
+  position: absolute;
+  inset: 0.55rem;
+  border: 1px solid rgba(122, 138, 120, 0.38);
+}
+
+.letter-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0.2rem;
+  border: 1px solid rgba(196, 176, 154, 0.55);
+}
+
+.letter-corner {
+  position: absolute;
+  width: 1.15rem;
+  height: 1.15rem;
+  background:
+    linear-gradient(var(--accent), var(--accent)) center / 100% 1px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) center / 1px 100% no-repeat;
+  opacity: 0.7;
+}
+
+.letter-corner::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.28rem;
+  height: 0.28rem;
+  border: 1px solid var(--accent);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.letter-corner-tl {
+  top: -1px;
+  left: -1px;
+}
+
+.letter-corner-tr {
+  top: -1px;
+  right: -1px;
+}
+
+.letter-corner-bl {
+  bottom: -1px;
+  left: -1px;
+}
+
+.letter-corner-br {
+  bottom: -1px;
+  right: -1px;
+}
+
+.letter-mono {
+  font-family: var(--font-display);
+  font-size: clamp(0.72rem, 1.8vw, 0.92rem);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  color: var(--accent);
+}
+
+.letter-mono span {
+  margin: 0 0.15em;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.letter-kicker {
+  font-family: var(--font-display);
+  font-size: clamp(0.68rem, 1.7vw, 0.82rem);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.letter-names {
+  font-family: var(--font-script);
+  font-size: clamp(2.1rem, 6.2vw, 3.1rem);
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--foreground);
+}
+
+.letter-flourish {
+  width: min(11rem, 46%);
+  height: 0.85rem;
+  margin: 0.15rem 0 0.05rem;
+  fill: var(--accent);
+  stroke: var(--accent);
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  opacity: 0.72;
+}
+
+.letter-date {
+  font-family: var(--font-display);
+  font-size: clamp(0.72rem, 1.8vw, 0.92rem);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--foreground);
+}
+
+.letter-place {
+  font-size: clamp(0.62rem, 1.5vw, 0.75rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Shadow the envelope casts across the card while it is still half inside. */
+.letter-mouth-shade {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 46%;
+  background: linear-gradient(180deg, transparent, rgba(56, 43, 28, 0.6));
+}
+
+/* Layer 3: the front pocket, built the way the paper actually folds — two side
+   flaps angling in to meet in a V, then the bottom flap folded up over them.
+   The outer corners sit on the backing's top edge; only the centre dips, which
+   is what lets the card show once the flap is open. */
+.envelope-pocket {
+  --pocket-paper: linear-gradient(165deg, #f3e8da 0%, #e3d2ba 100%);
+
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 0.3rem;
+  /* drop-shadow traces the clipped V rather than the element box, so the fold
+     casts onto the card behind it instead of casting a straight line. */
+  filter: drop-shadow(0 -3px 4px rgba(60, 46, 30, 0.22));
+  transform: translateZ(4px);
+}
+
+.pocket-side {
+  position: absolute;
+  inset: 0;
+}
+
+/* Percentages are of the full envelope. Corners sit at the backing's top
+   edge; the dip is at 46%. One shared fill so the V and the folded-up
+   bottom read as a single piece of paper. */
+.pocket-side-left {
+  background: var(--pocket-paper);
+  clip-path: polygon(0 0, 50% 46%, 50% 100%, 0 100%);
+}
+
+.pocket-side-right {
+  background: var(--pocket-paper);
+  clip-path: polygon(100% 0, 50% 46%, 50% 100%, 100% 100%);
+}
+
+.pocket-bottom {
+  position: absolute;
+  inset: 0;
+  background: var(--pocket-paper);
+  clip-path: polygon(0 60%, 50% 51%, 100% 60%, 100% 100%, 0 100%);
+}
+
+/* Layer 4: the flap, hinged on the very top edge of the backing. */
 .envelope-flap {
   position: absolute;
-  inset: 0 0 auto 0;
-  height: 55%;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 66%;
   transform-origin: top center;
-  background: linear-gradient(180deg, #f8f4ee 0%, #e7e0d5 100%);
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
-  border-top-left-radius: 0.35rem;
-  border-top-right-radius: 0.35rem;
-  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-  z-index: 2;
+  will-change: transform;
 }
 
-.envelope.is-open .envelope-flap {
-  transform: rotateX(180deg);
+/* One triangle, clipped once, holding both paper surfaces. The tip is a
+   shallow quadratic so it reads as folded paper rather than a sharp point.
+   Giving the lining a rotateX(180deg) of its own would rotate this clip along
+   with it and flip the triangle halfway through the opening. */
+.envelope-flap-face {
+  position: absolute;
+  inset: 0;
+  clip-path: url(#envelope-flap-clip);
+}
+
+.envelope-clip-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.flap-outer,
+.flap-lining,
+.flap-shade {
+  position: absolute;
+  inset: 0;
+}
+
+.flap-outer {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), transparent 28%),
+    linear-gradient(180deg, #fdf8ef 0%, #eddfca 60%, #dfcdb4 100%);
+}
+
+/* Only seen once the flap has folded back, by which point the hinge is at the
+   bottom of the shape on screen and the point is at the top. */
+.flap-lining {
+  background: linear-gradient(180deg, #74856a 0%, #8b9a87 62%, #93a18e 100%);
+}
+
+.flap-lining::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.16;
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.6) 0 1px,
+    transparent 1px 9px
+  );
+}
+
+.flap-shade {
+  background: linear-gradient(
+    180deg,
+    rgba(44, 35, 23, 0.9) 0%,
+    rgba(44, 35, 23, 0.3) 100%
+  );
+}
+
+/* Centring lives on the anchor so the seal itself is free to be animated
+   without the transform being overwritten. */
+.envelope-seal-anchor {
+  position: absolute;
+  top: 64%;
+  left: 50%;
+  transform: translate(-50%, -50%) translateZ(10px);
 }
 
 .envelope-seal {
+  position: relative;
+  display: grid;
+  width: 3.55rem;
+  height: 3.55rem;
+  place-items: center;
+  border-radius: 58% 42% 62% 38% / 46% 54% 48% 52%;
+  background:
+    radial-gradient(
+      circle at 30% 24%,
+      rgba(255, 196, 176, 0.38),
+      transparent 36%
+    ),
+    radial-gradient(circle at 68% 72%, rgba(60, 8, 6, 0.35), transparent 42%),
+    radial-gradient(
+      circle at 34% 28%,
+      #d94a38 0%,
+      #b4281c 38%,
+      #8a1a12 68%,
+      #5a0e0a 100%
+    );
+  box-shadow:
+    0 1px 0 rgba(255, 214, 196, 0.28),
+    0 3px 4px rgba(48, 12, 8, 0.28),
+    0 12px 18px rgba(92, 16, 12, 0.36),
+    inset 0 2px 3px rgba(255, 224, 208, 0.4),
+    inset 0 -5px 10px rgba(48, 8, 6, 0.55);
+  color: #f3ddd4;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-shadow:
+    0 1px 0 rgba(255, 214, 196, 0.22),
+    0 -1px 1px rgba(40, 6, 4, 0.55);
+  will-change: transform, opacity;
+}
+
+.envelope-seal > span {
+  position: relative;
+  z-index: 1;
+}
+
+/* Impressed rope ring, stamped into the wax. */
+.envelope-seal::before {
+  content: "";
   position: absolute;
-  left: 50%;
-  top: 42%;
-  z-index: 3;
-  width: 2.25rem;
-  height: 2.25rem;
-  translate: -50% -50%;
-  border-radius: 9999px;
-  background: var(--accent);
-  box-shadow: 0 4px 12px rgba(122, 138, 120, 0.35);
-  transition:
-    opacity 0.4s ease,
-    transform 0.4s ease;
+  inset: 11%;
+  border: 1.5px solid rgba(255, 214, 196, 0.22);
+  border-radius: inherit;
+  box-shadow:
+    inset 0 1px 2px rgba(48, 8, 6, 0.45),
+    0 1px 0 rgba(255, 210, 190, 0.16);
 }
 
-.envelope.is-open .envelope-seal {
-  opacity: 0;
-  transform: scale(0.6);
+/* A small drip of wax plus a hint of tooth, so it reads as a poured seal
+   rather than a flat disc. */
+.envelope-seal::after {
+  content: "";
+  position: absolute;
+  right: 22%;
+  bottom: -16%;
+  width: 28%;
+  height: 32%;
+  border-radius: 40% 55% 60% 45%;
+  background: radial-gradient(circle at 40% 30%, #c43326, #8a1a12 70%, #5a0e0a);
+  box-shadow:
+    0 4px 6px rgba(48, 8, 6, 0.28),
+    inset 0 1px 1px rgba(255, 200, 180, 0.22);
 }
 
-.scroll-locked {
-  overflow: hidden;
-  height: 100%;
+.envelope-back::after,
+.pocket-side::after,
+.pocket-bottom::after,
+.envelope-flap-face::after,
+.letter-card::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--paper-grain);
+  background-size: 140px 140px;
+  opacity: 0.06;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Still scroll-driven, but over a short enough range that the sequence is
+     done almost immediately rather than holding the reader in place. */
+  .envelope-scene {
+    height: 150vh;
+  }
 }
