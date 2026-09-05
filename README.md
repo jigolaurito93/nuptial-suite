@@ -1,8 +1,8 @@
 # Nuptial Suite
 
-Single-couple wedding website: a public invitation and a private planner for the bride and groom.
+Single-couple wedding website: a public invitation and a private admin page for the bride and groom.
 
-This repo is a structure template. Invitation pages, planner pages, and API routes are placeholders. Supabase, Resend, and Google Maps clients are stubbed and unused until later phases.
+This repo is a structure template. Invitation and admin sections are placeholders. Supabase, Resend, and Google Maps clients are stubbed and unused until later phases.
 
 ## Stack
 
@@ -21,7 +21,7 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The app runs without API keys. Planner auth redirects only after Supabase env vars are set.
+Open [http://localhost:3000](http://localhost:3000). The app runs without API keys. Admin auth redirects only after Supabase env vars are set.
 
 ## Environment variables
 
@@ -36,27 +36,17 @@ Copy `.env.example` to `.env.local` and fill in values when you are ready to con
 
 ## Routes
 
-**Public invitation**
+**Public invitation** (single page)
 
-- `/` — invitation home
-- `/story`
-- `/schedule`
-- `/venue`
-- `/rsvp`
-- `/registry`
+- `/` — invitation with in-page sections: home, story, schedule, venue, RSVP, registry
 
-**Couple planner** (protected when Supabase env is set)
+**Couple admin** (protected when Supabase env is set)
 
-- `/planner`
-- `/planner/guests`
-- `/planner/budget`
-- `/planner/vendors`
-- `/planner/tasks`
-- `/planner/invitation`
+- `/admin` — wedding planner with in-page sections: overview, guests, budget, vendors, tasks, invitation editor
 
 **Auth and API stubs**
 
-- `/login`
+- `/login` — couple sign-in, then `/admin`
 - `/auth/callback`
 - `POST /api/rsvp`
 - `POST /api/emails`
