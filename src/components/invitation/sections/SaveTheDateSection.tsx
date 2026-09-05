@@ -25,7 +25,7 @@ export function SaveTheDateSection() {
         <p className="mt-6 max-w-md text-base leading-relaxed text-muted">
           {invitation.message}
         </p>
-        <div className="relative mt-12 aspect-[4/5] w-full max-w-md overflow-hidden">
+        <div className="relative mt-12 aspect-4/5 w-full max-w-md overflow-hidden">
           <Image
             src={invitation.heroImage.src}
             alt={invitation.heroImage.alt}
