@@ -12,7 +12,7 @@ export function GiftGuideSection() {
       />
 
       <div className="mx-auto mt-14 grid max-w-4xl gap-16 md:grid-cols-2">
-        <div>
+        <div className="text-center md:text-left">
           <h3 className="text-xs tracking-[0.22em] text-accent uppercase">
             Registries
           </h3>
@@ -33,7 +33,7 @@ export function GiftGuideSection() {
           </ul>
         </div>
 
-        <div>
+        <div className="text-center md:text-left">
           <h3 className="text-xs tracking-[0.22em] text-accent uppercase">
             Monetary gift
           </h3>
@@ -46,10 +46,10 @@ export function GiftGuideSection() {
           <p className="mt-1 font-mono text-sm tracking-wide">
             {invitation.giftGuide.bank.accountNumber}
           </p>
-          <div className="mt-6">
+          <div className="mt-6 flex justify-center md:justify-start">
             <BankQr />
           </div>
-          <p className="mt-3 max-w-xs text-xs text-muted">
+          <p className="mx-auto mt-3 max-w-xs text-xs text-muted md:mx-0">
             {invitation.giftGuide.bank.disclaimer}
           </p>
         </div>
