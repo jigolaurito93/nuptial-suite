@@ -7,11 +7,6 @@ export function SaveTheDateSection() {
       id="save-the-date"
       className="invitation-section relative overflow-hidden px-6 py-24 sm:py-32"
     >
-      <div className="motion-orbs opacity-40" aria-hidden>
-        <span />
-        <span />
-        <span />
-      </div>
       <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center text-center">
         <p className="text-xs tracking-[0.28em] text-accent uppercase">
           {invitation.saveTheDateEyebrow}

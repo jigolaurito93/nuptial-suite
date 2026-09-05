@@ -182,7 +182,6 @@ body {
   z-index: 6;
 }
 
-.envelope-scene--touch .envelope-flap-face,
 .envelope-scene--touch .envelope-seal,
 .envelope-scene--touch .envelope-pocket,
 .envelope-scene--touch .envelope-shadow,
@@ -194,9 +193,8 @@ body {
   mix-blend-mode: normal;
 }
 
-.envelope-scene--touch .envelope-seal::after {
-  mix-blend-mode: normal;
-  opacity: 0.12;
+.envelope-scene--touch .envelope-seal-img {
+  filter: drop-shadow(0 4px 8px rgba(20, 12, 4, 0.35));
 }
 
 .envelope-scene--touch .motion-orbs span {
@@ -302,6 +300,7 @@ body {
   height: 100%;
   overflow: visible;
   transform-style: preserve-3d;
+  --envelope-skin: url("/envelope-material.svg") 50% 0 / 100% auto no-repeat;
 }
 
 /* Layer 1: the backing, which sets the envelope's overall size. */
@@ -309,9 +308,7 @@ body {
   position: absolute;
   inset: 0;
   border-radius: 0.3rem;
-  background:
-    linear-gradient(180deg, rgba(232, 220, 176, 0.14), transparent 34%),
-    linear-gradient(168deg, #1a3358 0%, #122444 52%, #0a1628 100%);
+  background: var(--envelope-skin);
   box-shadow:
     inset 0 0 0 1px rgba(212, 175, 55, 0.38),
     0 4px 10px rgba(8, 14, 28, 0.22),
@@ -352,23 +349,12 @@ body {
   justify-content: center;
   gap: 0.28rem;
   padding: 1.35rem 1.6rem;
-  border: 1px solid #e6d8c5;
+  border: 1px solid rgba(132, 108, 78, 0.4);
   border-radius: 0.18rem;
-  background:
-    radial-gradient(
-      ellipse at 50% 0%,
-      rgba(122, 138, 120, 0.08),
-      transparent 46%
-    ),
-    radial-gradient(
-      ellipse at 50% 100%,
-      rgba(196, 176, 154, 0.14),
-      transparent 42%
-    ),
-    linear-gradient(172deg, #fffdf9 0%, #fbf5ec 56%, #f3eade 100%);
+  background: url("/rustic-paper.svg") center / cover no-repeat;
   box-shadow:
-    inset 0 0 0 5px rgba(250, 245, 236, 0.9),
-    inset 0 0 0 6px rgba(214, 197, 173, 0.5);
+    inset 0 0 0 5px rgba(255, 248, 236, 0.22),
+    inset 0 0 0 6px rgba(120, 92, 58, 0.28);
 }
 
 .letter-frame {
@@ -431,7 +417,7 @@ body {
   font-size: clamp(0.72rem, 1.8vw, 0.92rem);
   font-weight: 600;
   letter-spacing: 0.22em;
-  color: var(--accent);
+  color: #2a1c12;
 }
 
 .letter-mono span {
@@ -445,7 +431,7 @@ body {
   font-size: clamp(0.68rem, 1.7vw, 0.82rem);
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: #2a1c12;
 }
 
 .letter-names {
@@ -453,7 +439,7 @@ body {
   font-size: clamp(2.4rem, 6.8vw, 3.45rem);
   font-weight: 400;
   line-height: 1.2;
-  color: var(--foreground);
+  color: #140e0a;
 }
 
 .letter-names-amp {
@@ -465,11 +451,11 @@ body {
   width: min(11rem, 46%);
   height: 0.85rem;
   margin: 0.15rem 0 0.05rem;
-  fill: var(--accent);
-  stroke: var(--accent);
+  fill: #2a1c12;
+  stroke: #2a1c12;
   stroke-width: 0.9;
   stroke-linecap: round;
-  opacity: 0.72;
+  opacity: 0.85;
 }
 
 .letter-date {
@@ -477,14 +463,14 @@ body {
   font-size: clamp(0.72rem, 1.8vw, 0.92rem);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--foreground);
+  color: #140e0a;
 }
 
 .letter-place {
   font-size: clamp(0.62rem, 1.5vw, 0.75rem);
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: #3a2a1c;
 }
 
 /* Shadow the envelope casts across the card while it is still half inside. */
@@ -511,7 +497,7 @@ body {
 }
 
 .envelope-pocket {
-  --pocket-paper: linear-gradient(165deg, #17345c 0%, #0d1e38 100%);
+  --pocket-paper: var(--envelope-skin);
 
   position: absolute;
   inset: 0;
@@ -583,11 +569,14 @@ body {
     42.84% 85.69%
   );
   /* drop-shadow follows the clipped triangle, so the flap casts onto the
-     pocket instead of a rectangular box. */
-  filter: drop-shadow(0 1px 0 rgba(232, 220, 176, 0.28))
-    drop-shadow(0 3px 2px rgba(8, 14, 28, 0.28))
-    drop-shadow(0 10px 12px rgba(8, 14, 28, 0.32))
-    drop-shadow(0 22px 18px rgba(8, 14, 28, 0.18));
+     pocket instead of a rectangular box. Tight 1px rings draw the fold
+     edge; the rest lifts the triangle off the matching envelope paper. */
+  filter: drop-shadow(0 0 0.5px rgba(232, 220, 176, 0.65))
+    drop-shadow(1px 1px 0 rgba(6, 12, 24, 0.55))
+    drop-shadow(-1px 1px 0 rgba(6, 12, 24, 0.55))
+    drop-shadow(0 2px 0 rgba(6, 12, 24, 0.4))
+    drop-shadow(0 5px 4px rgba(8, 14, 28, 0.38))
+    drop-shadow(0 14px 14px rgba(8, 14, 28, 0.28));
 }
 
 .flap-outer,
@@ -598,9 +587,7 @@ body {
 }
 
 .flap-outer {
-  background:
-    linear-gradient(180deg, rgba(232, 220, 176, 0.16), transparent 28%),
-    linear-gradient(180deg, #1c3a62 0%, #13284a 55%, #0c1a32 100%);
+  background: var(--envelope-skin);
 }
 
 .flap-outer::before {
@@ -619,10 +606,7 @@ body {
   pointer-events: none;
   position: absolute;
   inset: 0;
-  background: url("/flap-pattern.svg") center top / 100% 100% no-repeat;
-  filter: drop-shadow(0 1px 0 rgba(255, 244, 210, 0.35))
-    drop-shadow(0 -1px 0 rgba(48, 30, 4, 0.28));
-  opacity: 0.78;
+  background: url("/floralgold.svg") center / auto 100% repeat;
 }
 
 /* Only seen once the flap has folded back, by which point the hinge is at the
@@ -646,133 +630,26 @@ body {
   top: 59.5%;
   left: 50%;
   z-index: 6;
-  width: 4.25rem;
-  height: 4.25rem;
-  margin: -2.125rem 0 0 -2.125rem;
+  width: 7.25rem;
+  height: 7.25rem;
+  margin: -3.625rem 0 0 -3.625rem;
   transform: translateZ(12px);
 }
 
 .envelope-seal {
-  --wax-hi: #f3e2a8;
-  --wax-mid: #d4af37;
-  --wax-lo: #8a6416;
-
   position: relative;
-  display: grid;
-  width: 4.25rem;
-  height: 4.25rem;
-  place-items: center;
-  border-radius: 50%;
-  background:
-    radial-gradient(
-      circle at 32% 26%,
-      rgba(255, 246, 210, 0.7),
-      transparent 34%
-    ),
-    radial-gradient(circle at 70% 78%, rgba(80, 52, 10, 0.45), transparent 42%),
-    radial-gradient(
-      circle at 46% 38%,
-      var(--wax-hi) 0%,
-      var(--wax-mid) 46%,
-      #b89422 74%,
-      var(--wax-lo) 100%
-    );
-  box-shadow:
-    inset 0 3px 5px rgba(255, 244, 210, 0.45),
-    inset 0 -7px 12px rgba(70, 44, 8, 0.5),
-    0 1px 0 rgba(255, 236, 180, 0.35);
-  color: #5c430c;
-  font-family: var(--font-display);
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  filter: drop-shadow(0 1px 0 rgba(255, 236, 180, 0.35))
-    drop-shadow(0 6px 10px rgba(20, 12, 4, 0.4));
+  width: 7.25rem;
+  height: 7.25rem;
   will-change: transform, opacity;
 }
 
-.envelope-seal::before {
-  content: "";
-  pointer-events: none;
-  position: absolute;
-  top: 12%;
-  left: 18%;
-  width: 38%;
-  height: 22%;
-  border-radius: 60% 40% 50% 50%;
-  background: radial-gradient(
-    ellipse at 40% 40%,
-    rgba(255, 248, 220, 0.55),
-    transparent 70%
-  );
-}
-
-.envelope-seal::after {
-  content: "";
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background-image: var(--paper-grain);
-  background-size: 80px 80px;
-  opacity: 0.22;
-  mix-blend-mode: multiply;
-}
-
-.seal-drip {
-  display: none;
-}
-
-.seal-drip-a {
-  top: 68%;
-  left: 12%;
-  width: 22%;
-  height: 34%;
-  border-radius: 45% 55% 60% 40%;
-}
-
-.seal-drip-b {
-  top: 74%;
-  right: 18%;
-  width: 26%;
-  height: 38%;
-  border-radius: 50% 40% 55% 60%;
-}
-
-.seal-drip-c {
-  top: -8%;
-  right: 22%;
-  width: 16%;
-  height: 22%;
-  border-radius: 55% 45% 50% 60%;
-}
-
-.seal-ring {
-  position: absolute;
-  inset: 12%;
-  border: 1.5px solid rgba(255, 236, 180, 0.35);
-  border-radius: 50%;
-  box-shadow:
-    inset 0 2px 3px rgba(70, 44, 8, 0.35),
-    inset 0 -1px 1px rgba(255, 236, 180, 0.25),
-    0 1px 0 rgba(255, 236, 180, 0.2);
-}
-
-.seal-ring::before {
-  content: "";
-  position: absolute;
-  inset: 10%;
-  border: 1px solid rgba(92, 67, 12, 0.28);
-  border-radius: 50%;
-}
-
-.seal-mark {
-  position: relative;
-  z-index: 1;
-  color: #5c430c;
-  text-shadow:
-    0 1px 0 rgba(255, 244, 210, 0.45),
-    0 -1px 1px rgba(70, 44, 8, 0.35);
+.envelope-seal-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 0 rgba(255, 236, 180, 0.35))
+    drop-shadow(0 6px 10px rgba(20, 12, 4, 0.4));
 }
 
 .envelope-back::after,

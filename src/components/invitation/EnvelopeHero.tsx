@@ -37,6 +37,9 @@ const Z_CARD_OUT = 84;
 const CARD_WIDTH_RATIO = 0.84;
 const CARD_HEIGHT_RATIO = 0.63;
 const CARD_MAX_WIDTH = 620;
+const CARD_SETTLED_SCALE = 1.07;
+const CARD_SETTLED_ROTATE = 3;
+const CARD_SETTLED_X = 20;
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -193,28 +196,40 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
   // drops behind the card (2) so the letter can lift over it, and stays
   // below the pocket (4) so it does not paint on the envelope face.
   const flapLayer = useTransform(flapRotate, (deg) => (deg > 90 ? 1 : 5));
-  // 3. The card is drawn up and out, then floats forward and grows.
-  // It is laid out at its final size and only ever scaled down, so the type is
-  // never an upscaled bitmap. y is in px of the resting (small) slot so the
-  // travel stays the same when the native card is larger than the envelope.
+  // 3. The card is drawn up and out, then floats forward, grows a little
+  // past its layout size, and settles 3deg clockwise.
   const slotHeight = useMotionValue(140);
   const restScale = useMotionValue(0.48);
   const cardY = useTransform([progress, slotHeight], (latest: number[]) => {
     const [value, height] = latest;
     const lifted = -1.25 * height;
-    const settled = -0.8 * height;
+    const settled = -0.68 * height;
     const travel =
       value <= CARD_LIFT[1]
         ? mapRange(value, CARD_LIFT[0], CARD_LIFT[1], 0, lifted)
         : mapRange(value, CARD_LIFT[1], CARD_GROW[1], lifted, settled);
     return `calc(-50% + ${Math.round(travel)}px)`;
   });
+  const cardX = useTransform(progress, (value) => {
+    if (value <= CARD_LIFT[1]) return "-50%";
+    const shift = mapRange(
+      value,
+      CARD_LIFT[1],
+      CARD_GROW[1],
+      0,
+      CARD_SETTLED_X,
+    );
+    return `calc(-50% + ${Math.round(shift)}px)`;
+  });
   const cardRotate = useTransform(progress, (value) => {
-    if (touchScroll) return 0;
-    if (value <= CARD_LIFT[1]) {
-      return mapRange(value, CARD_LIFT[0], CARD_LIFT[1], 0, -1.4);
-    }
-    return mapRange(value, CARD_LIFT[1], CARD_GROW[1], -1.4, 0);
+    if (value <= CARD_LIFT[1]) return 0;
+    return mapRange(
+      value,
+      CARD_LIFT[1],
+      CARD_GROW[1],
+      0,
+      CARD_SETTLED_ROTATE,
+    );
   });
   // Depth only starts climbing at the top of the lift, where the card is clear
   // of the front panel, so it never visibly pops through the envelope.
@@ -229,7 +244,7 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
   const growth = useTransform(progress, CARD_GROW, [0, 1], { ease: easeInOut });
   const cardScale = useTransform([growth, restScale], (latest: number[]) => {
     const [amount, rest] = latest;
-    return rest + amount * (1 - rest);
+    return rest + amount * (CARD_SETTLED_SCALE - rest);
   });
   const cardShadow = useTransform(
     progress,
@@ -308,12 +323,6 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
       }
     >
       <div className="envelope-sticky">
-        <div className="motion-orbs" aria-hidden>
-          <span />
-          <span />
-          <span />
-        </div>
-
         <motion.div className="envelope-copy" style={{ opacity: copyOpacity }}>
           <motion.p
             className="text-xs tracking-[0.28em] text-muted uppercase"
@@ -369,13 +378,14 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
               style={
                 touchScroll
                   ? {
-                      x: "-50%",
+                      x: cardX,
                       y: cardY,
+                      rotate: cardRotate,
                       scale: cardScale,
                       zIndex: cardLayer,
                     }
                   : {
-                      x: "-50%",
+                      x: cardX,
                       y: cardY,
                       z: cardZ,
                       rotate: cardRotate,
@@ -476,11 +486,7 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
                       }
                 }
               >
-                <span className="seal-drip seal-drip-a" />
-                <span className="seal-drip seal-drip-b" />
-                <span className="seal-drip seal-drip-c" />
-                <span className="seal-ring" />
-                <span className="seal-mark">K&amp;B</span>
+                <img src="/kb-seal.svg" alt="" className="envelope-seal-img" />
               </motion.div>
             </div>
           </motion.div>
