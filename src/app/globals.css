@@ -219,7 +219,7 @@ body {
    viewport, which is where the enlarged card needs to land. */
 .envelope-copy {
   position: absolute;
-  top: clamp(2.5rem, 11vh, 6.5rem);
+  top: clamp(4rem, 16vh, 8.5rem);
   right: 1.5rem;
   left: 1.5rem;
   text-align: center;
@@ -240,6 +240,17 @@ body {
   overflow: visible;
   perspective: 1400px;
   perspective-origin: 50% 44%;
+}
+
+@media (min-width: 64rem) {
+  .envelope-copy {
+    top: clamp(6rem, 20vh, 11rem);
+  }
+
+  .envelope-stage {
+    top: 16vh;
+    width: min(42rem, 70vw);
+  }
 }
 
 .envelope-shadow-halo {

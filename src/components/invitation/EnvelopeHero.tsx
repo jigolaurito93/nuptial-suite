@@ -277,7 +277,7 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
 
       const slotWidth = stageWidth * CARD_WIDTH_RATIO;
       const room = Math.min(window.innerWidth * 0.9, CARD_MAX_WIDTH);
-      restScale.set(clamp(slotWidth / room, 0.38, 0.88));
+      restScale.set(clamp(slotWidth / room, 0.38, 1));
       slotHeight.set(node.offsetHeight * CARD_HEIGHT_RATIO);
     }
 
@@ -324,7 +324,7 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
             {invitation.saveTheDateEyebrow}
           </motion.p>
           <motion.h1
-            className="font-script mt-3 text-6xl leading-[1.15] text-foreground sm:text-7xl md:text-8xl"
+            className="font-script mt-3 text-7xl leading-[1.15] text-foreground sm:text-8xl md:text-9xl"
             initial={reduceMotion ? false : { opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.05 }}
