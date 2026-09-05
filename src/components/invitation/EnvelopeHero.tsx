@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   easeInOut,
   easeOut,
@@ -8,7 +8,6 @@ import {
   useMotionValue,
   useMotionValueEvent,
   useReducedMotion,
-  useScroll,
   useSpring,
   useTransform,
 } from "motion/react";
@@ -62,9 +61,10 @@ function documentOffsetTop(element: HTMLElement) {
   return top;
 }
 
-function readSceneProgress(scene: HTMLElement | null) {
+function readSceneProgress(scene: HTMLElement | null, viewportHeight: number) {
   if (!scene) return 0;
-  const max = scene.offsetHeight - window.innerHeight;
+  const view = viewportHeight || window.innerHeight;
+  const max = scene.offsetHeight - view;
   if (max <= 0) return 0;
   return clamp((window.scrollY - documentOffsetTop(scene)) / max, 0, 1);
 }
@@ -90,63 +90,67 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
   const sceneRef = useRef<HTMLElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const openedRef = useRef(false);
-  const smoothScroll = useRef(false);
-  const allowTilt = useRef(false);
-  const directScroll = useRef(true);
-  const [touchScroll, setTouchScroll] = useState(true);
+  const deviceIsTouch = useSyncExternalStore(
+    () => () => {},
+    prefersDirectScroll,
+    () => true,
+  );
+  const [fingerUsed, setFingerUsed] = useState(false);
   const reduceMotion = useReducedMotion();
+  const touchScroll = Boolean(deviceIsTouch || fingerUsed || reduceMotion);
+  const applySpring = useRef(false);
 
-  const { scrollYProgress } = useScroll({
-    target: sceneRef,
-    offset: ["start start", "end end"],
-  });
-
-  // Mouse wheels get a spring. Touch never does: phones often report
-  // pointer:fine, and Motion's getBoundingClientRect progress jitters while
-  // the iOS toolbar moves. Touch is driven from window.scrollY instead.
-  const progress = useMotionValue(0);
-  const smoothed = useSpring(scrollYProgress, {
+  // One scroll listener. iOS changes window.innerHeight as the URL bar hides,
+  // so the viewport height used for progress is locked after first layout.
+  // useScroll is not used: it reads getBoundingClientRect every frame and
+  // that measurement jitters on sticky + mobile chrome.
+  const rawProgress = useMotionValue(0);
+  const smoothed = useSpring(rawProgress, {
     stiffness: 140,
     damping: 38,
     mass: 0.25,
     restDelta: 0.0004,
   });
+  const progress = useMotionValue(0);
+  const viewportHeight = useRef(0);
 
   useEffect(() => {
-    function enableDirect() {
-      const alreadyDirect = directScroll.current;
-      directScroll.current = true;
-      smoothScroll.current = false;
-      allowTilt.current = false;
-      if (!alreadyDirect) setTouchScroll(true);
-      progress.set(readSceneProgress(sceneRef.current));
-    }
+    viewportHeight.current = window.innerHeight;
+
+    applySpring.current = !touchScroll;
 
     function onScroll() {
-      if (!directScroll.current) return;
-      progress.set(readSceneProgress(sceneRef.current));
+      const next = readSceneProgress(sceneRef.current, viewportHeight.current);
+      rawProgress.set(next);
+      if (touchScroll) progress.set(next);
     }
 
-    if (reduceMotion || prefersDirectScroll()) {
-      enableDirect();
-    } else {
-      directScroll.current = false;
-      smoothScroll.current = true;
-      allowTilt.current = true;
-      setTouchScroll(false);
-      progress.set(scrollYProgress.get());
+    function onTouchStart() {
+      setFingerUsed(true);
+      const next = readSceneProgress(sceneRef.current, viewportHeight.current);
+      rawProgress.set(next);
+      progress.set(next);
     }
+
+    function onOrientation() {
+      viewportHeight.current = window.innerHeight;
+      onScroll();
+    }
+
+    onScroll();
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("touchstart", enableDirect, { passive: true });
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("orientationchange", onOrientation);
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("touchstart", enableDirect);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("orientationchange", onOrientation);
     };
-  }, [progress, reduceMotion, scrollYProgress]);
+  }, [progress, rawProgress, touchScroll]);
 
   useMotionValueEvent(smoothed, "change", (latest) => {
-    if (smoothScroll.current) progress.set(latest);
+    if (applySpring.current) progress.set(latest);
   });
 
   // 1. The wax seal cracks and drops away.
@@ -163,9 +167,14 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
   });
   // At 90deg the flap is edge-on and invisible, which hides the depth swap that
   // drops it behind the envelope for the rest of the sequence.
-  const flapZ = useTransform(flapRotate, (deg) =>
-    deg > 90 ? -Z_FLAP : Z_FLAP,
-  );
+  const flapZ = useTransform(flapRotate, (deg) => {
+    if (touchScroll) return 0;
+    return deg > 90 ? -Z_FLAP : Z_FLAP;
+  });
+  const flapScaleY = useTransform(flapRotate, (deg) => {
+    const fold = deg <= 90 ? deg : 180 - deg;
+    return Math.max(0.02, Math.cos((fold * Math.PI) / 180));
+  });
   // Light grazes the paper as it turns edge-on, so it darkens towards 90deg and
   // recovers on the way back out. The two paper surfaces swap at that same
   // angle, where the flap has no visible area and the cut cannot be seen.
@@ -176,6 +185,7 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
   const flapLiningOpacity = useTransform(flapRotate, (deg) =>
     deg > 90 ? 1 : 0,
   );
+  const flapLayer = useTransform(flapRotate, (deg) => (deg > 90 ? 1 : 5));
 
   // 3. The card is drawn up and out, then floats forward and grows.
   // It is laid out at its final size and only ever scaled down, so the type is
@@ -194,7 +204,7 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
     return `calc(-50% + ${Math.round(travel)}px)`;
   });
   const cardRotate = useTransform(progress, (value) => {
-    if (directScroll.current) return 0;
+    if (touchScroll) return 0;
     if (value <= CARD_LIFT[1]) {
       return mapRange(value, CARD_LIFT[0], CARD_LIFT[1], 0, -1.4);
     }
@@ -203,12 +213,13 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
   // Depth only starts climbing at the top of the lift, where the card is clear
   // of the front panel, so it never visibly pops through the envelope.
   const cardZ = useTransform(progress, (value) => {
-    if (directScroll.current) {
-      return value > CARD_LIFT[1] ? Z_CARD_OUT : Z_CARD_IN;
-    }
+    if (touchScroll) return 0;
     if (value <= CARD_LIFT[1]) return Z_CARD_IN;
     return mapRange(value, CARD_LIFT[1], CARD_GROW[1], Z_CARD_IN, Z_CARD_OUT);
   });
+  const cardLayer = useTransform(progress, (value) =>
+    value > CARD_LIFT[1] ? 8 : 2,
+  );
   const growth = useTransform(progress, CARD_GROW, [0, 1], { ease: easeInOut });
   const cardScale = useTransform([growth, restScale], (latest: number[]) => {
     const [amount, rest] = latest;
@@ -229,7 +240,7 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
 
   // 4. Supporting elements step aside as the card takes over the frame.
   const envelopeTilt = useTransform(progress, (value) => {
-    if (!allowTilt.current) return 0;
+    if (touchScroll) return 0;
     if (value <= FLAP_OPEN[1]) {
       return mapRange(value, 0, FLAP_OPEN[1], 11, 5);
     }
@@ -268,13 +279,8 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
 
     const observer = new ResizeObserver(measure);
     observer.observe(stage);
-    // The stage stops growing once it hits its max width, so viewport changes
-    // past that point only ever show up on the window.
-    window.addEventListener("resize", measure);
-
     return () => {
       observer.disconnect();
-      window.removeEventListener("resize", measure);
     };
   }, [restScale, slotHeight]);
 
@@ -352,18 +358,30 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
             style={{ opacity: groundShadow }}
           />
 
-          <motion.div className="envelope" style={{ rotateX: envelopeTilt }}>
+          <motion.div
+            className="envelope"
+            style={touchScroll ? undefined : { rotateX: envelopeTilt }}
+          >
             <div className="envelope-back" aria-hidden />
 
             <motion.div
               className="envelope-letter"
-              style={{
-                x: "-50%",
-                y: cardY,
-                z: cardZ,
-                rotate: cardRotate,
-                scale: cardScale,
-              }}
+              style={
+                touchScroll
+                  ? {
+                      x: "-50%",
+                      y: cardY,
+                      scale: cardScale,
+                      zIndex: cardLayer,
+                    }
+                  : {
+                      x: "-50%",
+                      y: cardY,
+                      z: cardZ,
+                      rotate: cardRotate,
+                      scale: cardScale,
+                    }
+              }
             >
               <motion.div
                 className="letter-shadow"
@@ -416,7 +434,11 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
             <motion.div
               className="envelope-flap"
               aria-hidden
-              style={{ rotateX: flapRotate, z: flapZ }}
+              style={
+                touchScroll
+                  ? { scaleY: flapScaleY, zIndex: flapLayer }
+                  : { rotateX: flapRotate, z: flapZ }
+              }
             >
               <div className="envelope-flap-face">
                 <motion.div
@@ -437,12 +459,16 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
             <div className="envelope-seal-anchor" aria-hidden>
               <motion.div
                 className="envelope-seal"
-                style={{
-                  opacity: sealOpacity,
-                  scale: sealScale,
-                  rotate: sealRotate,
-                  y: sealY,
-                }}
+                style={
+                  touchScroll
+                    ? { opacity: sealOpacity }
+                    : {
+                        opacity: sealOpacity,
+                        scale: sealScale,
+                        rotate: sealRotate,
+                        y: sealY,
+                      }
+                }
               >
                 <span className="seal-drip seal-drip-a" />
                 <span className="seal-drip seal-drip-b" />

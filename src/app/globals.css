@@ -130,12 +130,31 @@ body {
   }
 }
 
-/* Touch already delivers continuous scroll. Filters and will-change force a
-   fresh paint every frame and are what made the envelope vibrate. */
+/* Touch: no 3D, no filters, no compositor hints. Those were redrawing the
+   envelope on every finger move and reading as a shake. */
+.envelope-scene--touch {
+  overflow-x: visible;
+}
+
 .envelope-scene--touch .envelope-letter,
 .envelope-scene--touch .envelope-flap,
 .envelope-scene--touch .envelope-seal {
   will-change: auto;
+}
+
+.envelope-scene--touch .envelope-stage {
+  perspective: none;
+}
+
+.envelope-scene--touch .envelope,
+.envelope-scene--touch .envelope-flap {
+  transform-style: flat;
+}
+
+.envelope-scene--touch .envelope-back,
+.envelope-scene--touch .envelope-pocket,
+.envelope-scene--touch .envelope-seal-anchor {
+  transform: none;
 }
 
 .envelope-scene--touch .envelope-flap-face,
@@ -144,6 +163,15 @@ body {
 .envelope-scene--touch .envelope-shadow,
 .envelope-scene--touch .envelope-shadow-halo {
   filter: none;
+}
+
+.envelope-scene--touch .envelope-seal {
+  mix-blend-mode: normal;
+}
+
+.envelope-scene--touch .envelope-seal::after {
+  mix-blend-mode: normal;
+  opacity: 0.12;
 }
 
 .envelope-scene--touch .motion-orbs span {
@@ -155,10 +183,10 @@ body {
   top: 0;
   display: grid;
   /* svh stays put while the mobile URL bar hides, unlike dvh, which resizes
-     the sticky stage mid-scroll and reads as a shake. */
+     the sticky stage mid-scroll and reads as a shake. Do not put a transform
+     on this element — it desyncs sticky from the scroll on iOS. */
   height: 100svh;
   place-items: center;
-  transform: translateZ(0);
 }
 
 @media (hover: hover) and (pointer: fine) {
