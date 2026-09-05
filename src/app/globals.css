@@ -8,6 +8,11 @@
   --accent-soft: #e4ebe3;
   --border: #ddd9d0;
   --surface: #fffcf8;
+  --envelope-navy: #0c1a32;
+  --envelope-navy-mid: #163056;
+  --envelope-navy-deep: #081225;
+  --envelope-gold: #d4af37;
+  --envelope-gold-hi: #f0e0b0;
   --orb-a: #c5d0c3;
   --orb-b: #d8cfc3;
   --orb-c: #c9d4d8;
@@ -259,8 +264,8 @@ body {
   border-radius: 1.2rem;
   background: radial-gradient(
     ellipse at 50% 58%,
-    rgba(48, 38, 24, 0.22) 0%,
-    rgba(48, 38, 24, 0.1) 42%,
+    rgba(8, 14, 28, 0.28) 0%,
+    rgba(8, 14, 28, 0.12) 42%,
     transparent 72%
   );
   filter: blur(28px);
@@ -275,8 +280,8 @@ body {
   border-radius: 100%;
   background: radial-gradient(
     ellipse at center,
-    rgba(48, 38, 24, 0.42) 0%,
-    rgba(48, 38, 24, 0.16) 40%,
+    rgba(8, 14, 28, 0.5) 0%,
+    rgba(8, 14, 28, 0.2) 40%,
     transparent 74%
   );
   filter: blur(14px);
@@ -305,13 +310,13 @@ body {
   inset: 0;
   border-radius: 0.3rem;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.42), transparent 32%),
-    linear-gradient(168deg, #f9f2e8 0%, #eddfca 54%, #e2d1b9 100%);
+    linear-gradient(180deg, rgba(232, 220, 176, 0.14), transparent 34%),
+    linear-gradient(168deg, #1a3358 0%, #122444 52%, #0a1628 100%);
   box-shadow:
-    inset 0 0 0 1px rgba(196, 176, 154, 0.55),
-    0 4px 10px rgba(48, 38, 24, 0.1),
-    0 18px 28px -10px rgba(48, 38, 24, 0.28),
-    0 36px 48px -16px rgba(48, 38, 24, 0.22);
+    inset 0 0 0 1px rgba(212, 175, 55, 0.38),
+    0 4px 10px rgba(8, 14, 28, 0.22),
+    0 18px 28px -10px rgba(8, 14, 28, 0.42),
+    0 36px 48px -16px rgba(8, 14, 28, 0.32);
   transform: translateZ(0);
 }
 
@@ -506,7 +511,7 @@ body {
 }
 
 .envelope-pocket {
-  --pocket-paper: linear-gradient(165deg, #f3e8da 0%, #e3d2ba 100%);
+  --pocket-paper: linear-gradient(165deg, #17345c 0%, #0d1e38 100%);
 
   position: absolute;
   inset: 0;
@@ -514,7 +519,7 @@ body {
   border-radius: 0.3rem;
   /* drop-shadow traces the clipped V rather than the element box, so the fold
      casts onto the card behind it instead of casting a straight line. */
-  filter: drop-shadow(0 -3px 4px rgba(60, 46, 30, 0.22));
+  filter: drop-shadow(0 -3px 4px rgba(8, 16, 32, 0.4));
 }
 
 .pocket-side {
@@ -579,10 +584,10 @@ body {
   );
   /* drop-shadow follows the clipped triangle, so the flap casts onto the
      pocket instead of a rectangular box. */
-  filter: drop-shadow(0 1px 0 rgba(255, 248, 236, 0.35))
-    drop-shadow(0 3px 2px rgba(48, 38, 24, 0.16))
-    drop-shadow(0 10px 12px rgba(48, 38, 24, 0.22))
-    drop-shadow(0 22px 18px rgba(48, 38, 24, 0.12));
+  filter: drop-shadow(0 1px 0 rgba(232, 220, 176, 0.28))
+    drop-shadow(0 3px 2px rgba(8, 14, 28, 0.28))
+    drop-shadow(0 10px 12px rgba(8, 14, 28, 0.32))
+    drop-shadow(0 22px 18px rgba(8, 14, 28, 0.18));
 }
 
 .flap-outer,
@@ -594,8 +599,8 @@ body {
 
 .flap-outer {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.5), transparent 28%),
-    linear-gradient(180deg, #fdf8ef 0%, #eddfca 60%, #dfcdb4 100%);
+    linear-gradient(180deg, rgba(232, 220, 176, 0.16), transparent 28%),
+    linear-gradient(180deg, #1c3a62 0%, #13284a 55%, #0c1a32 100%);
 }
 
 .flap-outer::before {
@@ -605,26 +610,25 @@ body {
   background: linear-gradient(
     180deg,
     transparent 62%,
-    rgba(60, 46, 30, 0.14) 100%
+    rgba(6, 12, 24, 0.28) 100%
   );
+}
+
+.flap-outer::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: url("/envelope-flap-floral.svg") center 8% / 92% auto no-repeat;
+  filter: drop-shadow(0 1px 0 rgba(255, 244, 210, 0.45))
+    drop-shadow(0 -1px 0 rgba(48, 30, 4, 0.35));
+  opacity: 0.88;
 }
 
 /* Only seen once the flap has folded back, by which point the hinge is at the
    bottom of the shape on screen and the point is at the top. */
 .flap-lining {
-  background: linear-gradient(180deg, #74856a 0%, #8b9a87 62%, #93a18e 100%);
-}
-
-.flap-lining::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  opacity: 0.16;
-  background-image: repeating-linear-gradient(
-    45deg,
-    rgba(255, 255, 255, 0.6) 0 1px,
-    transparent 1px 9px
-  );
+  background: linear-gradient(180deg, #10203c 0%, #1a3358 62%, #243e66 100%);
 }
 
 .flap-shade {
@@ -649,42 +653,41 @@ body {
 }
 
 .envelope-seal {
-  --wax-hi: #e05642;
-  --wax-mid: #b4281c;
-  --wax-lo: #6a100c;
+  --wax-hi: #f3e2a8;
+  --wax-mid: #d4af37;
+  --wax-lo: #8a6416;
 
   position: relative;
   display: grid;
   width: 4.25rem;
   height: 4.25rem;
   place-items: center;
-  border-radius: 62% 38% 58% 42% / 44% 56% 40% 60%;
+  border-radius: 50%;
   background:
     radial-gradient(
-      circle at 28% 22%,
-      rgba(255, 210, 190, 0.5),
-      transparent 32%
+      circle at 32% 26%,
+      rgba(255, 246, 210, 0.7),
+      transparent 34%
     ),
-    radial-gradient(circle at 72% 78%, rgba(40, 6, 4, 0.42), transparent 38%),
+    radial-gradient(circle at 70% 78%, rgba(80, 52, 10, 0.45), transparent 42%),
     radial-gradient(
-      circle at 36% 30%,
+      circle at 46% 38%,
       var(--wax-hi) 0%,
-      var(--wax-mid) 42%,
-      #8a1810 72%,
+      var(--wax-mid) 46%,
+      #b89422 74%,
       var(--wax-lo) 100%
     );
   box-shadow:
-    inset 0 3px 4px rgba(255, 220, 200, 0.38),
-    inset 0 -6px 12px rgba(40, 6, 4, 0.58),
-    inset 2px 0 4px rgba(40, 6, 4, 0.18);
-  color: #f6e2d8;
+    inset 0 3px 5px rgba(255, 244, 210, 0.45),
+    inset 0 -7px 12px rgba(70, 44, 8, 0.5),
+    0 1px 0 rgba(255, 236, 180, 0.35);
+  color: #5c430c;
   font-family: var(--font-display);
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
-  filter: drop-shadow(0 1px 0 rgba(255, 214, 196, 0.2))
-    drop-shadow(0 4px 3px rgba(48, 8, 6, 0.32))
-    drop-shadow(0 14px 16px rgba(92, 16, 12, 0.34));
+  letter-spacing: 0.1em;
+  filter: drop-shadow(0 1px 0 rgba(255, 236, 180, 0.35))
+    drop-shadow(0 6px 10px rgba(20, 12, 4, 0.4));
   will-change: transform, opacity;
 }
 
@@ -699,7 +702,7 @@ body {
   border-radius: 60% 40% 50% 50%;
   background: radial-gradient(
     ellipse at 40% 40%,
-    rgba(255, 230, 214, 0.45),
+    rgba(255, 248, 220, 0.55),
     transparent 70%
   );
 }
@@ -717,16 +720,7 @@ body {
 }
 
 .seal-drip {
-  position: absolute;
-  background: radial-gradient(
-    circle at 40% 28%,
-    var(--wax-hi),
-    var(--wax-mid) 58%,
-    var(--wax-lo)
-  );
-  box-shadow:
-    inset 0 1px 1px rgba(255, 210, 190, 0.28),
-    inset 0 -2px 3px rgba(40, 6, 4, 0.4);
+  display: none;
 }
 
 .seal-drip-a {
@@ -755,29 +749,30 @@ body {
 
 .seal-ring {
   position: absolute;
-  inset: 13%;
-  border: 1.5px solid rgba(255, 214, 196, 0.2);
-  border-radius: inherit;
+  inset: 12%;
+  border: 1.5px solid rgba(255, 236, 180, 0.35);
+  border-radius: 50%;
   box-shadow:
-    inset 0 2px 3px rgba(40, 6, 4, 0.5),
-    inset 0 -1px 1px rgba(255, 210, 190, 0.16),
-    0 1px 0 rgba(255, 214, 196, 0.14);
+    inset 0 2px 3px rgba(70, 44, 8, 0.35),
+    inset 0 -1px 1px rgba(255, 236, 180, 0.25),
+    0 1px 0 rgba(255, 236, 180, 0.2);
 }
 
 .seal-ring::before {
   content: "";
   position: absolute;
-  inset: 9%;
-  border: 1px dashed rgba(255, 214, 196, 0.18);
-  border-radius: inherit;
+  inset: 10%;
+  border: 1px solid rgba(92, 67, 12, 0.28);
+  border-radius: 50%;
 }
 
 .seal-mark {
   position: relative;
   z-index: 1;
+  color: #5c430c;
   text-shadow:
-    0 1px 0 rgba(255, 214, 196, 0.2),
-    0 -1px 1px rgba(40, 6, 4, 0.6);
+    0 1px 0 rgba(255, 244, 210, 0.45),
+    0 -1px 1px rgba(70, 44, 8, 0.35);
 }
 
 .envelope-back::after,
