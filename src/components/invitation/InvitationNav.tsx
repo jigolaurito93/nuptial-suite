@@ -28,7 +28,6 @@ export function InvitationNav({ visible }: InvitationNavProps) {
     if (!visible) return;
 
     lastY.current = window.scrollY;
-    setHidden(false);
 
     function onScroll() {
       const y = window.scrollY;

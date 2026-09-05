@@ -14,7 +14,7 @@ export function EntourageSection() {
       />
       <div className="mx-auto mt-14 grid max-w-5xl gap-14 sm:grid-cols-2">
         {invitation.entourage.map((group) => (
-          <div key={group.group}>
+          <div key={group.group} className="text-center">
             <h3 className="text-xs tracking-[0.22em] text-accent uppercase">
               {group.group}
             </h3>
