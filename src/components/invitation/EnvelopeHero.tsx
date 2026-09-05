@@ -181,13 +181,16 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
     if (!stage) return;
 
     function measure() {
-      const stageWidth = stage.offsetWidth;
+      const node = stageRef.current;
+      if (!node) return;
+
+      const stageWidth = node.offsetWidth;
       if (!stageWidth) return;
 
       const slotWidth = stageWidth * CARD_WIDTH_RATIO;
       const room = Math.min(window.innerWidth * 0.9, CARD_MAX_WIDTH);
       restScale.set(clamp(slotWidth / room, 0.38, 0.88));
-      slotHeight.set(stage.offsetHeight * CARD_HEIGHT_RATIO);
+      slotHeight.set(node.offsetHeight * CARD_HEIGHT_RATIO);
     }
 
     measure();
