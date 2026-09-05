@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   easeInOut,
   easeOut,
@@ -64,6 +64,9 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
   const sceneRef = useRef<HTMLElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const openedRef = useRef(false);
+  const smoothScroll = useRef(false);
+  const allowTilt = useRef(false);
+  const [touchScroll, setTouchScroll] = useState(true);
   const reduceMotion = useReducedMotion();
 
   const { scrollYProgress } = useScroll({
@@ -71,15 +74,34 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
     offset: ["start start", "end end"],
   });
 
-  // Wheels and trackpads deliver scroll in coarse steps. Running progress
-  // through a spring turns those steps into continuous motion.
+  // One progress value so the same transforms can follow the wheel through a
+  // spring, or the finger 1:1. A spring on touch lags behind the scroll and
+  // the 3D tilt turns that lag into a visible shake.
+  const progress = useMotionValue(0);
   const smoothed = useSpring(scrollYProgress, {
-    stiffness: 110,
-    damping: 32,
-    mass: 0.4,
-    restDelta: 0.0002,
+    stiffness: 140,
+    damping: 38,
+    mass: 0.25,
+    restDelta: 0.0004,
   });
-  const progress = reduceMotion ? scrollYProgress : smoothed;
+
+  useEffect(() => {
+    const fine = window.matchMedia("(pointer: fine)").matches;
+    const hover = window.matchMedia("(hover: hover)").matches;
+    const direct = Boolean(reduceMotion || !fine || !hover);
+    smoothScroll.current = !direct;
+    allowTilt.current = !direct;
+    setTouchScroll(direct);
+    progress.set(scrollYProgress.get());
+  }, [progress, reduceMotion, scrollYProgress]);
+
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (!smoothScroll.current) progress.set(latest);
+  });
+
+  useMotionValueEvent(smoothed, "change", (latest) => {
+    if (smoothScroll.current) progress.set(latest);
+  });
 
   // 1. The wax seal cracks and drops away.
   const sealOpacity = useTransform(progress, SEAL_BREAK, [1, 0], {
@@ -158,12 +180,13 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
   );
 
   // 4. Supporting elements step aside as the card takes over the frame.
-  const envelopeTilt = useTransform(
-    progress,
-    [0, FLAP_OPEN[1], CARD_LIFT[1]],
-    [11, 5, 0],
-    { ease: [easeInOut, easeInOut] },
-  );
+  const envelopeTilt = useTransform(progress, (value) => {
+    if (!allowTilt.current) return 0;
+    if (value <= FLAP_OPEN[1]) {
+      return mapRange(value, 0, FLAP_OPEN[1], 11, 5);
+    }
+    return mapRange(value, FLAP_OPEN[1], CARD_LIFT[1], 5, 0);
+  });
   const groundShadow = useTransform(
     progress,
     [CARD_LIFT[0], CARD_GROW[1]],
@@ -218,7 +241,11 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
     <section
       ref={sceneRef}
       aria-label="Open invitation"
-      className="envelope-scene relative z-20"
+      className={
+        touchScroll
+          ? "envelope-scene envelope-scene--touch relative z-20"
+          : "envelope-scene relative z-20"
+      }
     >
       <svg className="envelope-clip-defs" aria-hidden>
         <defs>

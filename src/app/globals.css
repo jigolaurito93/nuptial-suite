@@ -130,6 +130,14 @@ body {
   }
 }
 
+/* Touch already delivers continuous scroll. Promoting these layers and
+   interpolating them with a spring is what made the envelope vibrate. */
+.envelope-scene--touch .envelope-letter,
+.envelope-scene--touch .envelope-flap,
+.envelope-scene--touch .envelope-seal {
+  will-change: auto;
+}
+
 .envelope-sticky {
   position: sticky;
   top: 0;
