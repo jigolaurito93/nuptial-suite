@@ -43,6 +43,32 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
+function prefersDirectScroll() {
+  if (typeof window === "undefined") return true;
+  if (navigator.maxTouchPoints > 0) return true;
+  if ("ontouchstart" in window) return true;
+  if (window.matchMedia("(pointer: coarse)").matches) return true;
+  if (window.matchMedia("(hover: none)").matches) return true;
+  return false;
+}
+
+function documentOffsetTop(element: HTMLElement) {
+  let top = 0;
+  let node: HTMLElement | null = element;
+  while (node) {
+    top += node.offsetTop;
+    node = node.offsetParent instanceof HTMLElement ? node.offsetParent : null;
+  }
+  return top;
+}
+
+function readSceneProgress(scene: HTMLElement | null) {
+  if (!scene) return 0;
+  const max = scene.offsetHeight - window.innerHeight;
+  if (max <= 0) return 0;
+  return clamp((window.scrollY - documentOffsetTop(scene)) / max, 0, 1);
+}
+
 function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
 }
@@ -66,6 +92,7 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
   const openedRef = useRef(false);
   const smoothScroll = useRef(false);
   const allowTilt = useRef(false);
+  const directScroll = useRef(true);
   const [touchScroll, setTouchScroll] = useState(true);
   const reduceMotion = useReducedMotion();
 
@@ -74,9 +101,9 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
     offset: ["start start", "end end"],
   });
 
-  // One progress value so the same transforms can follow the wheel through a
-  // spring, or the finger 1:1. A spring on touch lags behind the scroll and
-  // the 3D tilt turns that lag into a visible shake.
+  // Mouse wheels get a spring. Touch never does: phones often report
+  // pointer:fine, and Motion's getBoundingClientRect progress jitters while
+  // the iOS toolbar moves. Touch is driven from window.scrollY instead.
   const progress = useMotionValue(0);
   const smoothed = useSpring(scrollYProgress, {
     stiffness: 140,
@@ -86,18 +113,37 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
   });
 
   useEffect(() => {
-    const fine = window.matchMedia("(pointer: fine)").matches;
-    const hover = window.matchMedia("(hover: hover)").matches;
-    const direct = Boolean(reduceMotion || !fine || !hover);
-    smoothScroll.current = !direct;
-    allowTilt.current = !direct;
-    setTouchScroll(direct);
-    progress.set(scrollYProgress.get());
-  }, [progress, reduceMotion, scrollYProgress]);
+    function enableDirect() {
+      const alreadyDirect = directScroll.current;
+      directScroll.current = true;
+      smoothScroll.current = false;
+      allowTilt.current = false;
+      if (!alreadyDirect) setTouchScroll(true);
+      progress.set(readSceneProgress(sceneRef.current));
+    }
 
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (!smoothScroll.current) progress.set(latest);
-  });
+    function onScroll() {
+      if (!directScroll.current) return;
+      progress.set(readSceneProgress(sceneRef.current));
+    }
+
+    if (reduceMotion || prefersDirectScroll()) {
+      enableDirect();
+    } else {
+      directScroll.current = false;
+      smoothScroll.current = true;
+      allowTilt.current = true;
+      setTouchScroll(false);
+      progress.set(scrollYProgress.get());
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("touchstart", enableDirect, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("touchstart", enableDirect);
+    };
+  }, [progress, reduceMotion, scrollYProgress]);
 
   useMotionValueEvent(smoothed, "change", (latest) => {
     if (smoothScroll.current) progress.set(latest);
@@ -145,22 +191,24 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
       value <= CARD_LIFT[1]
         ? mapRange(value, CARD_LIFT[0], CARD_LIFT[1], 0, lifted)
         : mapRange(value, CARD_LIFT[1], CARD_GROW[1], lifted, settled);
-    return `calc(-50% + ${travel}px)`;
+    return `calc(-50% + ${Math.round(travel)}px)`;
   });
-  const cardRotate = useTransform(
-    progress,
-    [CARD_LIFT[0], CARD_LIFT[1], CARD_GROW[1]],
-    [0, -1.4, 0],
-    { ease: [easeInOut, easeInOut] },
-  );
+  const cardRotate = useTransform(progress, (value) => {
+    if (directScroll.current) return 0;
+    if (value <= CARD_LIFT[1]) {
+      return mapRange(value, CARD_LIFT[0], CARD_LIFT[1], 0, -1.4);
+    }
+    return mapRange(value, CARD_LIFT[1], CARD_GROW[1], -1.4, 0);
+  });
   // Depth only starts climbing at the top of the lift, where the card is clear
   // of the front panel, so it never visibly pops through the envelope.
-  const cardZ = useTransform(
-    progress,
-    [CARD_LIFT[1], CARD_GROW[1]],
-    [Z_CARD_IN, Z_CARD_OUT],
-    { ease: easeInOut },
-  );
+  const cardZ = useTransform(progress, (value) => {
+    if (directScroll.current) {
+      return value > CARD_LIFT[1] ? Z_CARD_OUT : Z_CARD_IN;
+    }
+    if (value <= CARD_LIFT[1]) return Z_CARD_IN;
+    return mapRange(value, CARD_LIFT[1], CARD_GROW[1], Z_CARD_IN, Z_CARD_OUT);
+  });
   const growth = useTransform(progress, CARD_GROW, [0, 1], { ease: easeInOut });
   const cardScale = useTransform([growth, restScale], (latest: number[]) => {
     const [amount, rest] = latest;
@@ -396,7 +444,11 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
                   y: sealY,
                 }}
               >
-                <span>K&amp;B</span>
+                <span className="seal-drip seal-drip-a" />
+                <span className="seal-drip seal-drip-b" />
+                <span className="seal-drip seal-drip-c" />
+                <span className="seal-ring" />
+                <span className="seal-mark">K&amp;B</span>
               </motion.div>
             </div>
           </motion.div>
