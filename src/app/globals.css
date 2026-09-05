@@ -21,7 +21,7 @@
   --color-accent-soft: var(--accent-soft);
   --color-border: var(--border);
   --color-surface: var(--surface);
-  --font-sans: "Outfit", system-ui, sans-serif;
+  --font-sans: "Outfit Variable", system-ui, sans-serif;
   --font-display: "Cormorant Garamond", Georgia, serif;
 }
 
@@ -159,7 +159,9 @@ body {
   border-radius: 9999px;
   background: var(--accent);
   box-shadow: 0 4px 12px rgba(122, 138, 120, 0.35);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
 }
 
 .envelope.is-open .envelope-seal {

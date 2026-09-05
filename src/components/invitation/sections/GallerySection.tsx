@@ -19,6 +19,7 @@ export function GallerySection() {
               src={image.src}
               alt={image.alt}
               fill
+              unoptimized
               sizes="(max-width: 768px) 50vw, 33vw"
               className="object-cover"
             />

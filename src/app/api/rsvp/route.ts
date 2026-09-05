@@ -41,7 +41,10 @@ export async function POST(request: Request) {
   try {
     json = await request.json();
   } catch {
-    return NextResponse.json({ message: "Invalid JSON body." }, { status: 400 });
+    return NextResponse.json(
+      { message: "Invalid JSON body." },
+      { status: 400 },
+    );
   }
 
   if (!isRsvpPayload(json)) {

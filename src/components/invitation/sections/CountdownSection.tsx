@@ -21,23 +21,21 @@ function getTimeLeft(target: Date): TimeLeft {
 }
 
 export function CountdownSection() {
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() =>
-    getTimeLeft(new Date(invitation.weddingDate)),
-  );
+  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
 
   useEffect(() => {
     const target = new Date(invitation.weddingDate);
-    const id = window.setInterval(() => {
-      setTimeLeft(getTimeLeft(target));
-    }, 1000);
+    const tick = () => setTimeLeft(getTimeLeft(target));
+    tick();
+    const id = window.setInterval(tick, 1000);
     return () => window.clearInterval(id);
   }, []);
 
   const units = [
-    { label: "Days", value: timeLeft.days },
-    { label: "Hours", value: timeLeft.hours },
-    { label: "Minutes", value: timeLeft.minutes },
-    { label: "Seconds", value: timeLeft.seconds },
+    { label: "Days", value: timeLeft?.days },
+    { label: "Hours", value: timeLeft?.hours },
+    { label: "Minutes", value: timeLeft?.minutes },
+    { label: "Seconds", value: timeLeft?.seconds },
   ];
 
   return (
@@ -51,7 +49,7 @@ export function CountdownSection() {
         {units.map((unit) => (
           <div key={unit.label} className="text-center">
             <p className="font-display text-5xl font-medium tabular-nums tracking-tight sm:text-6xl">
-              {String(unit.value).padStart(2, "0")}
+              {unit.value == null ? "—" : String(unit.value).padStart(2, "0")}
             </p>
             <p className="mt-2 text-xs tracking-[0.2em] text-muted uppercase">
               {unit.label}

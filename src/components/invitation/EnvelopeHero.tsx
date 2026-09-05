@@ -35,7 +35,9 @@ export function EnvelopeHero({
       </div>
 
       <div className="relative z-10 flex flex-col items-center">
-        <p className="text-xs tracking-[0.28em] text-muted uppercase">{eyebrow}</p>
+        <p className="text-xs tracking-[0.28em] text-muted uppercase">
+          {eyebrow}
+        </p>
         <h1 className="font-display mt-4 text-5xl font-medium tracking-tight text-foreground sm:text-6xl md:text-7xl">
           {names}
         </h1>

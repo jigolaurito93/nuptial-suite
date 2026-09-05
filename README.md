@@ -27,12 +27,12 @@ Open [http://localhost:3000](http://localhost:3000). The invitation runs without
 
 Copy `.env.example` to `.env.local` and fill in values when you are ready to connect services:
 
-| Variable | Used for |
-| --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key |
-| `RESEND_API_KEY` | Transactional email (later) |
-| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Venue map embed (later) |
+| Variable                          | Used for                    |
+| --------------------------------- | --------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`        | Supabase project URL        |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`   | Supabase anonymous key      |
+| `RESEND_API_KEY`                  | Transactional email (later) |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Venue map embed (later)     |
 
 ### Supabase RSVP setup
 
@@ -51,19 +51,19 @@ Single-page experience with an envelope gate:
 2. Click the envelope — flap opens, scroll unlocks, optional background music starts.
 3. Sections below:
 
-| Section | Anchor |
-| --- | --- |
-| Save the date | `#save-the-date` |
-| Countdown | `#countdown` |
-| Venue (+ hotels) | `#venue` |
-| Program flow | `#program` |
-| Entourage | `#entourage` |
-| Dress code | `#dress-code` |
-| Gallery | `#gallery` |
-| Gift guide | `#gift-guide` |
-| RSVP | `#rsvp` |
-| FAQs | `#faqs` |
-| See you there | `#see-you-there` |
+| Section          | Anchor           |
+| ---------------- | ---------------- |
+| Save the date    | `#save-the-date` |
+| Countdown        | `#countdown`     |
+| Venue (+ hotels) | `#venue`         |
+| Program flow     | `#program`       |
+| Entourage        | `#entourage`     |
+| Dress code       | `#dress-code`    |
+| Gallery          | `#gallery`       |
+| Gift guide       | `#gift-guide`    |
+| RSVP             | `#rsvp`          |
+| FAQs             | `#faqs`          |
+| See you there    | `#see-you-there` |
 
 Static copy lives in [`src/content/invitation.ts`](src/content/invitation.ts) (Jack & Jill sample data).
 

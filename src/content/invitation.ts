@@ -47,19 +47,32 @@ export const invitation = {
     },
   ],
   program: [
-    { time: "2:30 PM", title: "Guest arrival", detail: "Don Bosco Chapel on the Hill" },
+    {
+      time: "2:30 PM",
+      title: "Guest arrival",
+      detail: "Don Bosco Chapel on the Hill",
+    },
     { time: "3:00 PM", title: "Ceremony", detail: "Exchange of vows" },
-    { time: "4:30 PM", title: "Cocktail hour", detail: "Antonio's Restaurant gardens" },
-    { time: "6:00 PM", title: "Reception", detail: "Dinner, toasts, and dancing" },
-    { time: "10:00 PM", title: "Send-off", detail: "Sparklers and well wishes" },
+    {
+      time: "4:30 PM",
+      title: "Cocktail hour",
+      detail: "Antonio's Restaurant gardens",
+    },
+    {
+      time: "6:00 PM",
+      title: "Reception",
+      detail: "Dinner, toasts, and dancing",
+    },
+    {
+      time: "10:00 PM",
+      title: "Send-off",
+      detail: "Sparklers and well wishes",
+    },
   ],
   entourage: [
     {
       group: "Parents of the Couple",
-      people: [
-        "Mr. & Mrs. Robert Smith",
-        "Mr. & Mrs. Daniel Rivera",
-      ],
+      people: ["Mr. & Mrs. Robert Smith", "Mr. & Mrs. Daniel Rivera"],
     },
     {
       group: "Principal Sponsors",
@@ -150,7 +163,8 @@ export const invitation = {
       accountName: "Jack Smith & Jill Rivera",
       accountNumber: "0000-1234-5678",
       payload: "BANK:Sample Bank PH|ACCT:0000-1234-5678|NAME:Jack & Jill",
-      disclaimer: "Sample QR for demo only — replace with real account details later.",
+      disclaimer:
+        "Sample QR for demo only — replace with real account details later.",
     },
   },
   faqs: [

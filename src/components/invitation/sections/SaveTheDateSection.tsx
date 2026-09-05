@@ -31,6 +31,7 @@ export function SaveTheDateSection() {
             alt={invitation.heroImage.alt}
             fill
             priority
+            unoptimized
             sizes="(max-width: 768px) 100vw, 28rem"
             className="object-cover"
           />

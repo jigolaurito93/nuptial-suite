@@ -20,7 +20,10 @@ export function EntourageSection() {
             </h3>
             <ul className="mt-4 space-y-2">
               {group.people.map((person) => (
-                <li key={person} className="font-display text-xl text-foreground">
+                <li
+                  key={person}
+                  className="font-display text-xl text-foreground"
+                >
                   {person}
                 </li>
               ))}

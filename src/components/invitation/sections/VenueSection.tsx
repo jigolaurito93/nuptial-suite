@@ -3,7 +3,10 @@ import { SectionHeading } from "@/components/invitation/SectionHeading";
 
 export function VenueSection() {
   return (
-    <section id="venue" className="invitation-section border-t border-border px-6 py-24">
+    <section
+      id="venue"
+      className="invitation-section border-t border-border px-6 py-24"
+    >
       <SectionHeading
         eyebrow="Locations"
         title="Venue"
