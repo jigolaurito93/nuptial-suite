@@ -182,9 +182,19 @@ export const invitation = {
         "Limited parking is available on site. Carpooling is encouraged, and hotel transfers can be arranged in Tagaytay.",
     },
     {
-      question: "Are children welcome?",
+      question: "Can I bring a guest/date?",
       answer:
-        "Yes — children are welcome. A quiet room will be available at the reception if little ones need a break.",
+        'We unfortunately cannot accommodate additional guests. Due to limited capacity, we can only allow the people named on your invitation. Your invitation will be made out to "{Your Name} & Guest" if a plus one has been given to you.',
+    },
+    {
+      question: "Are kids invited?",
+      answer:
+        'Due to limited numbers, we hope you appreciate that children are only invited if named. Your invitation will be made out to "The {Your Last Name} Family" if your children have been invited, and "Mr. & Mrs." if only you and your significant other have been invited.',
+    },
+    {
+      question: "Are there any colors I should avoid wearing?",
+      answer:
+        "Kindly avoid white, ivory, and overly bright neons so the couple can stand out in photos. Soft neutrals, sage, and muted florals are a lovely choice.",
     },
     {
       question: "What is the weather like in February?",
