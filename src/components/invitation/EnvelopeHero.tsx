@@ -1,7 +1,6 @@
 "use client";
 
 type EnvelopeHeroProps = {
-  isOpen: boolean;
   isOpening: boolean;
   onOpen: () => void;
   eyebrow: string;
@@ -10,23 +9,16 @@ type EnvelopeHeroProps = {
 };
 
 export function EnvelopeHero({
-  isOpen,
   isOpening,
   onOpen,
   eyebrow,
   names,
   hint,
 }: EnvelopeHeroProps) {
-  const showOpenAnimation = isOpening || isOpen;
-
   return (
     <section
       aria-label="Open invitation"
-      className={`relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-6 text-center transition-opacity duration-500 ${
-        isOpen
-          ? "pointer-events-none absolute inset-x-0 top-0 z-0 h-0 min-h-0 overflow-hidden opacity-0"
-          : "z-20 opacity-100"
-      }`}
+      className="relative z-20 flex min-h-dvh flex-col items-center justify-center overflow-hidden px-6 text-center"
     >
       <div className="motion-orbs" aria-hidden>
         <span />
@@ -45,11 +37,11 @@ export function EnvelopeHero({
         <button
           type="button"
           className={`envelope mt-12 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${
-            showOpenAnimation ? "is-open" : ""
+            isOpening ? "is-open" : ""
           }`}
           onClick={onOpen}
           aria-label="Open the invitation envelope"
-          disabled={showOpenAnimation}
+          disabled={isOpening}
         >
           <div className="envelope-body" />
           <div className="envelope-flap" />

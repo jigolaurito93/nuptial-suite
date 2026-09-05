@@ -64,11 +64,7 @@ export function InvitationPage() {
     window.setTimeout(() => {
       setIsOpen(true);
       setIsOpening(false);
-      requestAnimationFrame(() => {
-        document
-          .getElementById("save-the-date")
-          ?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
+      window.scrollTo({ top: 0, behavior: "auto" });
     }, 900);
   }
 
@@ -76,39 +72,35 @@ export function InvitationPage() {
     <div className="relative flex min-h-dvh flex-col bg-background text-foreground">
       <audio ref={audioRef} src={invitation.audioSrc} loop preload="none" />
 
-      <EnvelopeHero
-        isOpen={isOpen}
-        isOpening={isOpening}
-        onOpen={handleOpen}
-        eyebrow={invitation.saveTheDateEyebrow}
-        names={invitation.couple.displayNames}
-        hint={invitation.envelopeHint}
-      />
+      {!isOpen ? (
+        <EnvelopeHero
+          isOpening={isOpening}
+          onOpen={handleOpen}
+          eyebrow={invitation.saveTheDateEyebrow}
+          names={invitation.couple.displayNames}
+          hint={invitation.envelopeHint}
+        />
+      ) : null}
 
-      <div
-        className={
-          isOpen
-            ? "relative z-10 flex flex-1 flex-col"
-            : "pointer-events-none invisible absolute inset-0 -z-10 overflow-hidden"
-        }
-        aria-hidden={!isOpen}
-      >
-        <InvitationNav visible={isOpen} />
-        <main className="flex-1">
-          <SaveTheDateSection />
-          <CountdownSection />
-          <VenueSection />
-          <ProgramSection />
-          <EntourageSection />
-          <DressCodeSection />
-          <GallerySection />
-          <GiftGuideSection />
-          <RsvpSection />
-          <FaqsSection />
-          <SeeYouThereSection />
-        </main>
-        <InvitationFooter />
-      </div>
+      {isOpen ? (
+        <div className="relative z-10 flex flex-1 flex-col">
+          <InvitationNav visible />
+          <main className="flex-1">
+            <SaveTheDateSection />
+            <CountdownSection />
+            <VenueSection />
+            <ProgramSection />
+            <EntourageSection />
+            <DressCodeSection />
+            <GallerySection />
+            <GiftGuideSection />
+            <RsvpSection />
+            <FaqsSection />
+            <SeeYouThereSection />
+          </main>
+          <InvitationFooter />
+        </div>
+      ) : null}
 
       <AudioControl
         visible={isOpen}

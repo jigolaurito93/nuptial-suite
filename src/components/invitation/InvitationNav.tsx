@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { invitation } from "@/content/invitation";
 
 const links = [
@@ -20,10 +21,42 @@ type InvitationNavProps = {
 };
 
 export function InvitationNav({ visible }: InvitationNavProps) {
+  const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
+
+  useEffect(() => {
+    if (!visible) return;
+
+    lastY.current = window.scrollY;
+    setHidden(false);
+
+    function onScroll() {
+      const y = window.scrollY;
+      const delta = y - lastY.current;
+
+      if (y < 16) {
+        setHidden(false);
+      } else if (delta > 8) {
+        setHidden(true);
+      } else if (delta < -8) {
+        setHidden(false);
+      }
+
+      lastY.current = y;
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [visible]);
+
   if (!visible) return null;
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border/80 bg-background/90 backdrop-blur-md">
+    <header
+      className={`sticky top-0 z-30 border-b border-border/80 bg-background/90 backdrop-blur-md transition-transform duration-300 ${
+        hidden ? "pointer-events-none -translate-y-full" : "translate-y-0"
+      }`}
+    >
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-3">
         <a
           href="#save-the-date"
