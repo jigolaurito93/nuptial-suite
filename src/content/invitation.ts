@@ -1,12 +1,14 @@
 export const invitation = {
   couple: {
-    partnerOne: "Jack",
-    partnerTwo: "Jill",
-    displayNames: "Jack & Jill",
+    partnerOne: "Kennett",
+    partnerTwo: "Bea",
+    displayNames: "Kennett & Bea",
+    fullNames: "Kennett Ramos & Bea Alibutud",
   },
-  weddingDate: "2027-06-20T15:00:00+08:00",
-  weddingDateLabel: "Saturday, 20 June 2027",
+  weddingDate: "2028-02-08T15:00:00+08:00",
+  weddingDateLabel: "Tuesday, 8 February 2028",
   weddingTimeLabel: "3:00 PM",
+  rsvpByLabel: "8 January 2028",
   saveTheDateEyebrow: "Save the date",
   envelopeHint: "Click the envelope to open",
   message:
@@ -160,9 +162,10 @@ export const invitation = {
     ],
     bank: {
       bankName: "Sample Bank PH",
-      accountName: "Jack Smith & Jill Rivera",
+      accountName: "Kennett Ramos & Bea Alibutud",
       accountNumber: "0000-1234-5678",
-      payload: "BANK:Sample Bank PH|ACCT:0000-1234-5678|NAME:Jack & Jill",
+      payload:
+        "BANK:Sample Bank PH|ACCT:0000-1234-5678|NAME:Kennett Ramos & Bea Alibutud",
       disclaimer:
         "Sample QR for demo only — replace with real account details later.",
     },
@@ -184,14 +187,14 @@ export const invitation = {
         "Yes — children are welcome. A quiet room will be available at the reception if little ones need a break.",
     },
     {
-      question: "What is the weather like in June?",
+      question: "What is the weather like in February?",
       answer:
         "Tagaytay evenings can be cool and breezy. A light jacket or shawl is a good idea.",
     },
     {
       question: "How do I RSVP?",
       answer:
-        "Use the RSVP section on this page. Kindly respond by 20 May 2027 so we can finalize seating.",
+        "Use the RSVP section on this page. Kindly respond by 8 January 2028 so we can finalize seating.",
     },
   ],
   seeYouThere: {

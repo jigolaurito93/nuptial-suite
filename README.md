@@ -65,7 +65,7 @@ Single-page experience with an envelope gate:
 | FAQs             | `#faqs`          |
 | See you there    | `#see-you-there` |
 
-Static copy lives in [`src/content/invitation.ts`](src/content/invitation.ts) (Jack & Jill sample data).
+Static copy lives in [`src/content/invitation.ts`](src/content/invitation.ts) (Kennett Ramos & Bea Alibutud).
 
 ### Audio
 

@@ -1,3 +1,4 @@
+import { invitation } from "@/content/invitation";
 import { SectionHeading } from "@/components/invitation/SectionHeading";
 import { RsvpForm } from "@/components/invitation/RsvpForm";
 
@@ -10,7 +11,7 @@ export function RsvpSection() {
       <SectionHeading
         eyebrow="Kindly reply"
         title="RSVP"
-        description="Let us know if you will join us. Please respond by 20 May 2027."
+        description={`Let us know if you will join us. Please respond by ${invitation.rsvpByLabel}.`}
       />
       <div className="mt-14">
         <RsvpForm />

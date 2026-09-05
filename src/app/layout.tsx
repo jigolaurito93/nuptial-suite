@@ -7,8 +7,9 @@ import "@fontsource/cormorant-garamond/latin-700.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Jack & Jill — Save the Date",
-  description: "You are invited to celebrate the wedding of Jack and Jill.",
+  title: "Kennett & Bea — Save the Date",
+  description:
+    "You are invited to celebrate the wedding of Kennett Ramos and Bea Alibutud.",
 };
 
 export default function RootLayout({
