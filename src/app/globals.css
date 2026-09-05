@@ -152,9 +152,29 @@ body {
 }
 
 .envelope-scene--touch .envelope-back,
+.envelope-scene--touch .envelope-pocket-layer,
 .envelope-scene--touch .envelope-pocket,
 .envelope-scene--touch .envelope-seal-anchor {
   transform: none;
+}
+
+/* Card is z-index 2 while it is in the pocket and 8 once it is clear.
+   Without a higher pocket it paints on the envelope face on the way back. */
+.envelope-scene--touch .envelope-back {
+  z-index: 0;
+}
+
+.envelope-scene--touch .envelope-pocket-layer,
+.envelope-scene--touch .envelope-pocket {
+  z-index: 4;
+}
+
+.envelope-scene--touch .envelope-flap {
+  z-index: 5;
+}
+
+.envelope-scene--touch .envelope-seal-anchor {
+  z-index: 6;
 }
 
 .envelope-scene--touch .envelope-flap-face,
@@ -217,6 +237,7 @@ body {
   position: relative;
   width: min(21rem, 74vw);
   aspect-ratio: 1.6 / 1;
+  overflow: visible;
   perspective: 1400px;
   perspective-origin: 50% 44%;
 }
@@ -263,6 +284,7 @@ body {
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: visible;
   transform-style: preserve-3d;
 }
 
@@ -412,10 +434,15 @@ body {
 
 .letter-names {
   font-family: var(--font-script);
-  font-size: clamp(2.1rem, 6.2vw, 3.1rem);
+  font-size: clamp(2.4rem, 6.8vw, 3.45rem);
   font-weight: 400;
   line-height: 1.2;
   color: var(--foreground);
+}
+
+.letter-names-amp {
+  font-size: 0.5em;
+  vertical-align: middle;
 }
 
 .letter-flourish {
@@ -458,6 +485,15 @@ body {
    flaps angling in to meet in a V, then the bottom flap folded up over them.
    The outer corners sit on the backing's top edge; only the centre dips, which
    is what lets the card show once the flap is open. */
+/* Depth lives on the wrapper so overflow/drop-shadow on the pocket cannot
+   flatten it out of the 3D stack — that is what left the card in front
+   on the way back in. */
+.envelope-pocket-layer {
+  position: absolute;
+  inset: 0;
+  transform: translateZ(4px);
+}
+
 .envelope-pocket {
   --pocket-paper: linear-gradient(165deg, #f3e8da 0%, #e3d2ba 100%);
 
@@ -468,7 +504,6 @@ body {
   /* drop-shadow traces the clipped V rather than the element box, so the fold
      casts onto the card behind it instead of casting a straight line. */
   filter: drop-shadow(0 -3px 4px rgba(60, 46, 30, 0.22));
-  transform: translateZ(4px);
 }
 
 .pocket-side {
@@ -514,20 +549,29 @@ body {
 .envelope-flap-face {
   position: absolute;
   inset: 0;
-  clip-path: url(#envelope-flap-clip);
+  /* CSS polygon survives a scaleY through 0; the SVG url() clip was
+     collapsing at the edge-on frame and never recovering. */
+  /* Inverted triangle with a tangent fillet at the point — the curve
+     starts on the long edges so it does not read as a cap glued on. */
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    57.16% 85.69%,
+    55.94% 87.46%,
+    54.24% 88.89%,
+    52.21% 89.8%,
+    50% 90.11%,
+    47.79% 89.8%,
+    45.76% 88.89%,
+    44.06% 87.46%,
+    42.84% 85.69%
+  );
   /* drop-shadow follows the clipped triangle, so the flap casts onto the
      pocket instead of a rectangular box. */
   filter: drop-shadow(0 1px 0 rgba(255, 248, 236, 0.35))
     drop-shadow(0 3px 2px rgba(48, 38, 24, 0.16))
     drop-shadow(0 10px 12px rgba(48, 38, 24, 0.22))
     drop-shadow(0 22px 18px rgba(48, 38, 24, 0.12));
-}
-
-.envelope-clip-defs {
-  position: absolute;
-  width: 0;
-  height: 0;
-  overflow: hidden;
 }
 
 .flap-outer,
@@ -580,13 +624,17 @@ body {
   );
 }
 
-/* Centring lives on the anchor so the seal itself is free to be animated
-   without the transform being overwritten. */
+/* Sized and margined onto the flap tip so touch mode's `transform: none`
+   cannot un-centre it. 59.5% is 66% flap height × 90.1% fillet tip. */
 .envelope-seal-anchor {
   position: absolute;
-  top: 64%;
+  top: 59.5%;
   left: 50%;
-  transform: translate(-50%, -50%) translateZ(10px);
+  z-index: 6;
+  width: 4.25rem;
+  height: 4.25rem;
+  margin: -2.125rem 0 0 -2.125rem;
+  transform: translateZ(12px);
 }
 
 .envelope-seal {

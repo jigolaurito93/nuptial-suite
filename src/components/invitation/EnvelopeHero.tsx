@@ -165,15 +165,19 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
   const flapRotate = useTransform(progress, FLAP_OPEN, [0, 180], {
     ease: easeInOut,
   });
-  // At 90deg the flap is edge-on and invisible, which hides the depth swap that
-  // drops it behind the envelope for the rest of the sequence.
   const flapZ = useTransform(flapRotate, (deg) => {
     if (touchScroll) return 0;
-    return deg > 90 ? -Z_FLAP : Z_FLAP;
+    // Open flap sits behind the card (1) so the letter can slide over it,
+    // and in front of the backing (0) so the lining triangle stays visible.
+    return deg > 90 ? 0.5 : Z_FLAP;
   });
+  // cos(0)=1 closed (point down), cos(180)=-1 open (point up). A tiny
+  // floor keeps the SVG/CSS clip from collapsing to nothing at 90deg.
   const flapScaleY = useTransform(flapRotate, (deg) => {
-    const fold = deg <= 90 ? deg : 180 - deg;
-    return Math.max(0.02, Math.cos((fold * Math.PI) / 180));
+    const y = Math.cos((deg * Math.PI) / 180);
+    const min = 0.08;
+    if (Math.abs(y) >= min) return y;
+    return deg > 90 ? -min : min;
   });
   // Light grazes the paper as it turns edge-on, so it darkens towards 90deg and
   // recovers on the way back out. The two paper surfaces swap at that same
@@ -185,8 +189,10 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
   const flapLiningOpacity = useTransform(flapRotate, (deg) =>
     deg > 90 ? 1 : 0,
   );
+  // Closed flap covers the card (5). Once it is open the lining triangle
+  // drops behind the card (2) so the letter can lift over it, and stays
+  // below the pocket (4) so it does not paint on the envelope face.
   const flapLayer = useTransform(flapRotate, (deg) => (deg > 90 ? 1 : 5));
-
   // 3. The card is drawn up and out, then floats forward and grows.
   // It is laid out at its final size and only ever scaled down, so the type is
   // never an upscaled bitmap. y is in px of the resting (small) slot so the
@@ -301,14 +307,6 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
           : "envelope-scene relative z-20"
       }
     >
-      <svg className="envelope-clip-defs" aria-hidden>
-        <defs>
-          <clipPath id="envelope-flap-clip" clipPathUnits="objectBoundingBox">
-            <path d="M 0 0 H 1 L 0.535 0.91 Q 0.5 1.02 0.465 0.91 Z" />
-          </clipPath>
-        </defs>
-      </svg>
-
       <div className="envelope-sticky">
         <div className="motion-orbs" aria-hidden>
           <span />
@@ -331,7 +329,9 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.05 }}
           >
-            {invitation.couple.displayNames}
+            {invitation.couple.partnerOne}{" "}
+            <span className="letter-names-amp">&amp;</span>{" "}
+            {invitation.couple.partnerTwo}
           </motion.h1>
         </motion.div>
 
@@ -400,7 +400,11 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
                   K<span>&amp;</span>B
                 </p>
                 <p className="letter-kicker">You&apos;re invited</p>
-                <p className="letter-names">{invitation.couple.displayNames}</p>
+                <p className="letter-names">
+                  {invitation.couple.partnerOne}{" "}
+                  <span className="letter-names-amp">&amp;</span>{" "}
+                  {invitation.couple.partnerTwo}
+                </p>
                 <svg
                   className="letter-flourish"
                   viewBox="0 0 160 18"
@@ -425,10 +429,12 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
               </div>
             </motion.div>
 
-            <div className="envelope-pocket" aria-hidden>
-              <div className="pocket-side pocket-side-left" />
-              <div className="pocket-side pocket-side-right" />
-              <div className="pocket-bottom" />
+            <div className="envelope-pocket-layer" aria-hidden>
+              <div className="envelope-pocket">
+                <div className="pocket-side pocket-side-left" />
+                <div className="pocket-side pocket-side-right" />
+                <div className="pocket-bottom" />
+              </div>
             </div>
 
             <motion.div
