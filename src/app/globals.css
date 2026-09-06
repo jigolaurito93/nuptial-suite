@@ -424,22 +424,27 @@ body {
   }
 }
 
-/* Copy is positioned rather than stacked so the stage sits dead centre in the
-   viewport, which is where the enlarged card needs to land. */
+.envelope-cluster {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
 .envelope-copy {
-  position: absolute;
-  top: auto;
-  right: 1.5rem;
-  bottom: calc(50% + min(21rem, 74vw) / 3.2 + 1.25rem);
-  left: 1.5rem;
+  position: relative;
+  width: 100%;
+  padding: 0 1.5rem;
+  margin-bottom: 1.25rem;
   text-align: center;
 }
 
 .envelope-hint {
-  position: absolute;
-  right: 1.5rem;
-  bottom: clamp(2rem, 8vh, 4.5rem);
-  left: 1.5rem;
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  padding: 0 1.5rem;
+  margin-top: 2.5rem;
   text-align: center;
 }
 
@@ -453,23 +458,13 @@ body {
 }
 
 @media (min-width: 48rem) {
-  .envelope-copy {
-    bottom: calc(50% + min(30rem, 68vw) / 3.2 + 1.25rem);
-  }
-
   .envelope-stage {
     width: min(30rem, 68vw);
   }
 }
 
 @media (min-width: 64rem) {
-  .envelope-copy {
-    top: clamp(6rem, 20vh, 11rem);
-    bottom: auto;
-  }
-
   .envelope-stage {
-    top: 16vh;
     width: min(42rem, 70vw);
   }
 }

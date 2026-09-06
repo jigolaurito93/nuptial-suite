@@ -327,188 +327,193 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
       }
     >
       <div className="envelope-sticky">
-        <motion.div className="envelope-copy" style={{ opacity: copyOpacity }}>
-          <motion.p
-            className="text-xs tracking-[0.28em] text-muted uppercase"
-            initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            {invitation.saveTheDateEyebrow}
-          </motion.p>
-          <motion.h1
-            className="font-script mt-3 text-7xl leading-[1.15] text-foreground sm:text-8xl md:text-9xl"
-            initial={reduceMotion ? false : { opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.05 }}
-          >
-            {invitation.couple.partnerOne}{" "}
-            <span className="letter-names-amp">&amp;</span>{" "}
-            {invitation.couple.partnerTwo}
-          </motion.h1>
-        </motion.div>
-
-        <motion.div
-          ref={stageRef}
-          className="envelope-stage"
-          initial={reduceMotion ? false : { opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            type: "spring",
-            stiffness: 90,
-            damping: 18,
-            delay: 0.1,
-          }}
-        >
+        <div className="envelope-cluster">
           <motion.div
-            className="envelope-shadow-halo"
-            aria-hidden
-            style={{ opacity: groundShadow }}
-          />
-          <motion.div
-            className="envelope-shadow"
-            aria-hidden
-            style={{ opacity: groundShadow }}
-          />
-
-          <motion.div
-            className="envelope"
-            style={touchScroll ? undefined : { rotateX: envelopeTilt }}
+            className="envelope-copy"
+            style={{ opacity: copyOpacity }}
           >
-            <div className="envelope-back" aria-hidden />
-
-            <motion.div
-              className="envelope-letter"
-              style={
-                touchScroll
-                  ? {
-                      x: cardX,
-                      y: cardY,
-                      rotate: cardRotate,
-                      scale: cardScale,
-                      zIndex: cardLayer,
-                    }
-                  : {
-                      x: cardX,
-                      y: cardY,
-                      z: cardZ,
-                      rotate: cardRotate,
-                      scale: cardScale,
-                    }
-              }
+            <motion.p
+              className="text-xs tracking-[0.28em] text-muted uppercase"
+              initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
             >
-              <motion.div
-                className="letter-shadow"
-                aria-hidden
-                style={{ opacity: cardShadow }}
-              />
-              <div className="letter-card">
-                <div className="letter-frame" aria-hidden>
-                  <span className="letter-corner letter-corner-tl" />
-                  <span className="letter-corner letter-corner-tr" />
-                  <span className="letter-corner letter-corner-bl" />
-                  <span className="letter-corner letter-corner-br" />
-                </div>
+              {invitation.saveTheDateEyebrow}
+            </motion.p>
+            <motion.h1
+              className="font-script mt-3 text-7xl leading-[1.15] text-foreground sm:text-8xl md:text-9xl"
+              initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.05 }}
+            >
+              {invitation.couple.partnerOne}{" "}
+              <span className="letter-names-amp">&amp;</span>{" "}
+              {invitation.couple.partnerTwo}
+            </motion.h1>
+          </motion.div>
 
-                <p className="letter-mono" aria-hidden>
-                  K<span>&amp;</span>B
-                </p>
-                <p className="letter-kicker">You&apos;re invited</p>
-                <p className="letter-names">
-                  {invitation.couple.partnerOne}{" "}
-                  <span className="letter-names-amp">&amp;</span>{" "}
-                  {invitation.couple.partnerTwo}
-                </p>
-                <svg
-                  className="letter-flourish"
-                  viewBox="0 0 160 18"
-                  aria-hidden
-                >
-                  <path d="M4 9 H62" />
-                  <path d="M98 9 H156" />
-                  <path d="M80 2.5 C86 6 86 12 80 15.5 C74 12 74 6 80 2.5 Z" />
-                  <path d="M72 9 C76 5 78 5 80 9 C82 5 84 5 88 9 C84 13 82 13 80 9 C78 13 76 13 72 9 Z" />
-                </svg>
-                <p className="letter-date">{invitation.weddingDateLabel}</p>
-                <p className="letter-place">
-                  {invitation.weddingTimeLabel}
-                  <span aria-hidden> · </span>
-                  Nasugbu &amp; Tagaytay
-                </p>
-                <motion.div
-                  className="letter-mouth-shade"
-                  aria-hidden
-                  style={{ opacity: cardMouthShade }}
-                />
-              </div>
-            </motion.div>
-
-            <div className="envelope-pocket-layer" aria-hidden>
-              <div className="envelope-pocket">
-                <div className="pocket-side pocket-side-left" />
-                <div className="pocket-side pocket-side-right" />
-                <div className="pocket-bottom" />
-              </div>
-            </div>
-
+          <motion.div
+            ref={stageRef}
+            className="envelope-stage"
+            initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 90,
+              damping: 18,
+              delay: 0.1,
+            }}
+          >
             <motion.div
-              className="envelope-flap"
+              className="envelope-shadow-halo"
               aria-hidden
-              style={
-                touchScroll
-                  ? { scaleY: flapScaleY, zIndex: flapLayer }
-                  : { rotateX: flapRotate, z: flapZ }
-              }
-            >
-              <div className="envelope-flap-face">
-                <motion.div
-                  className="flap-outer"
-                  style={{ opacity: flapOuterOpacity }}
-                />
-                <motion.div
-                  className="flap-lining"
-                  style={{ opacity: flapLiningOpacity }}
-                />
-                <motion.div
-                  className="flap-shade"
-                  style={{ opacity: flapShade }}
-                />
-              </div>
-            </motion.div>
+              style={{ opacity: groundShadow }}
+            />
+            <motion.div
+              className="envelope-shadow"
+              aria-hidden
+              style={{ opacity: groundShadow }}
+            />
 
-            <div className="envelope-seal-anchor" aria-hidden>
+            <motion.div
+              className="envelope"
+              style={touchScroll ? undefined : { rotateX: envelopeTilt }}
+            >
+              <div className="envelope-back" aria-hidden />
+
               <motion.div
-                className="envelope-seal"
+                className="envelope-letter"
                 style={
                   touchScroll
-                    ? { opacity: sealOpacity }
+                    ? {
+                        x: cardX,
+                        y: cardY,
+                        rotate: cardRotate,
+                        scale: cardScale,
+                        zIndex: cardLayer,
+                      }
                     : {
-                        opacity: sealOpacity,
-                        scale: sealScale,
-                        rotate: sealRotate,
-                        y: sealY,
+                        x: cardX,
+                        y: cardY,
+                        z: cardZ,
+                        rotate: cardRotate,
+                        scale: cardScale,
                       }
                 }
               >
-                <Image
-                  src="/kb-seal.svg"
-                  alt=""
-                  fill
-                  unoptimized
-                  sizes="(min-width: 64rem) 7.25rem, 5rem"
-                  className="envelope-seal-img"
+                <motion.div
+                  className="letter-shadow"
+                  aria-hidden
+                  style={{ opacity: cardShadow }}
                 />
-              </motion.div>
-            </div>
-          </motion.div>
-        </motion.div>
+                <div className="letter-card">
+                  <div className="letter-frame" aria-hidden>
+                    <span className="letter-corner letter-corner-tl" />
+                    <span className="letter-corner letter-corner-tr" />
+                    <span className="letter-corner letter-corner-bl" />
+                    <span className="letter-corner letter-corner-br" />
+                  </div>
 
-        <motion.p
-          className="envelope-hint text-sm text-muted"
-          style={{ opacity: hintOpacity }}
-        >
-          {invitation.envelopeHint}
-        </motion.p>
+                  <p className="letter-mono" aria-hidden>
+                    K<span>&amp;</span>B
+                  </p>
+                  <p className="letter-kicker">You&apos;re invited</p>
+                  <p className="letter-names">
+                    {invitation.couple.partnerOne}{" "}
+                    <span className="letter-names-amp">&amp;</span>{" "}
+                    {invitation.couple.partnerTwo}
+                  </p>
+                  <svg
+                    className="letter-flourish"
+                    viewBox="0 0 160 18"
+                    aria-hidden
+                  >
+                    <path d="M4 9 H62" />
+                    <path d="M98 9 H156" />
+                    <path d="M80 2.5 C86 6 86 12 80 15.5 C74 12 74 6 80 2.5 Z" />
+                    <path d="M72 9 C76 5 78 5 80 9 C82 5 84 5 88 9 C84 13 82 13 80 9 C78 13 76 13 72 9 Z" />
+                  </svg>
+                  <p className="letter-date">{invitation.weddingDateLabel}</p>
+                  <p className="letter-place">
+                    {invitation.weddingTimeLabel}
+                    <span aria-hidden> · </span>
+                    Nasugbu &amp; Tagaytay
+                  </p>
+                  <motion.div
+                    className="letter-mouth-shade"
+                    aria-hidden
+                    style={{ opacity: cardMouthShade }}
+                  />
+                </div>
+              </motion.div>
+
+              <div className="envelope-pocket-layer" aria-hidden>
+                <div className="envelope-pocket">
+                  <div className="pocket-side pocket-side-left" />
+                  <div className="pocket-side pocket-side-right" />
+                  <div className="pocket-bottom" />
+                </div>
+              </div>
+
+              <motion.div
+                className="envelope-flap"
+                aria-hidden
+                style={
+                  touchScroll
+                    ? { scaleY: flapScaleY, zIndex: flapLayer }
+                    : { rotateX: flapRotate, z: flapZ }
+                }
+              >
+                <div className="envelope-flap-face">
+                  <motion.div
+                    className="flap-outer"
+                    style={{ opacity: flapOuterOpacity }}
+                  />
+                  <motion.div
+                    className="flap-lining"
+                    style={{ opacity: flapLiningOpacity }}
+                  />
+                  <motion.div
+                    className="flap-shade"
+                    style={{ opacity: flapShade }}
+                  />
+                </div>
+              </motion.div>
+
+              <div className="envelope-seal-anchor" aria-hidden>
+                <motion.div
+                  className="envelope-seal"
+                  style={
+                    touchScroll
+                      ? { opacity: sealOpacity }
+                      : {
+                          opacity: sealOpacity,
+                          scale: sealScale,
+                          rotate: sealRotate,
+                          y: sealY,
+                        }
+                  }
+                >
+                  <Image
+                    src="/kb-seal.svg"
+                    alt=""
+                    fill
+                    unoptimized
+                    sizes="(min-width: 64rem) 7.25rem, 5rem"
+                    className="envelope-seal-img"
+                  />
+                </motion.div>
+              </div>
+            </motion.div>
+          </motion.div>
+
+          <motion.p
+            className="envelope-hint text-sm text-muted"
+            style={{ opacity: hintOpacity }}
+          >
+            {invitation.envelopeHint}
+          </motion.p>
+        </div>
       </div>
     </section>
   );
