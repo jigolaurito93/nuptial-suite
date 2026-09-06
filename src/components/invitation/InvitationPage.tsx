@@ -43,7 +43,15 @@ export function InvitationPage() {
   }, [opened, muted]);
 
   return (
-    <div className="relative flex min-h-dvh flex-col bg-background text-foreground">
+    <div className="relative flex min-h-dvh flex-col text-foreground">
+      <div className="liquid-atmosphere" aria-hidden>
+        <span className="silk-wash silk-aurora" />
+        <span className="silk-wash silk-aurora-b" />
+        <span className="silk-wash silk-a" />
+        <span className="silk-wash silk-b" />
+        <span className="silk-wash silk-c" />
+        <div className="liquid-glass" />
+      </div>
       <audio ref={audioRef} src={invitation.audioSrc} loop preload="none" />
 
       <EnvelopeHero onOpenedChange={onOpenedChange} />

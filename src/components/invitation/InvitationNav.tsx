@@ -58,7 +58,7 @@ export function InvitationNav({ visible }: InvitationNavProps) {
           animate={{ y: hidden ? "-100%" : 0 }}
           exit={{ y: "-100%" }}
           transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-          className="sticky top-0 z-30 border-b border-border/80 bg-background/90 backdrop-blur-md"
+          className="sticky top-0 z-30 border-b border-white/40 bg-background/40 shadow-[0_8px_32px_rgba(28,28,26,0.06)] backdrop-blur-xl"
         >
           <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-3">
             <a
