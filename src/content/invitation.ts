@@ -145,7 +145,7 @@ export const invitation = {
       alt: "Outdoor celebration",
     },
     {
-      src: "https://images.unsplash.com/photo-1507504031003-b41795c21143?w=900&q=80",
+      src: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=900&q=80",
       alt: "Table setting",
     },
     {
