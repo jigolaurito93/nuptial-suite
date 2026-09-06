@@ -317,11 +317,6 @@ body {
   .silk-wash {
     animation: none;
   }
-
-  .signature-pen {
-    animation: none;
-    stroke-dashoffset: 0;
-  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -443,36 +438,6 @@ body {
   padding: 0 1.5rem;
   margin-bottom: 0;
   text-align: center;
-}
-
-.hero-signature-heading {
-  display: flex;
-  justify-content: center;
-  margin: 0.35rem 0 0;
-}
-
-.hero-signature {
-  display: block;
-  width: min(42rem, 92vw);
-  height: auto;
-  overflow: visible;
-}
-
-.signature-pen {
-  fill: none;
-  stroke: #fff;
-  stroke-width: 420;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: signature-draw 3.4s cubic-bezier(0.4, 0.05, 0.2, 1) 0.35s forwards;
-}
-
-@keyframes signature-draw {
-  to {
-    stroke-dashoffset: 0;
-  }
 }
 
 .envelope-hint {
