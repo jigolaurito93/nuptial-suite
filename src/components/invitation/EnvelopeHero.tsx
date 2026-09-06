@@ -341,14 +341,48 @@ export function EnvelopeHero({ onOpenedChange }: EnvelopeHeroProps) {
               {invitation.saveTheDateEyebrow}
             </motion.p>
             <motion.h1
-              className="font-script mt-3 text-7xl leading-[1.15] text-foreground sm:text-8xl md:text-9xl"
-              initial={reduceMotion ? false : { opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.05 }}
+              className="hero-signature-heading"
+              aria-label={`${invitation.couple.partnerOne} & ${invitation.couple.partnerTwo}`}
             >
-              {invitation.couple.partnerOne}{" "}
-              <span className="letter-names-amp">&amp;</span>{" "}
-              {invitation.couple.partnerTwo}
+              <svg
+                className="hero-signature"
+                viewBox="0 650 1296 300"
+                role="img"
+                aria-hidden
+              >
+                <defs>
+                  <mask
+                    id="kb-signature-write"
+                    maskUnits="userSpaceOnUse"
+                    x="0"
+                    y="650"
+                    width="1296"
+                    height="300"
+                  >
+                    {reduceMotion ? (
+                      <rect
+                        x="0"
+                        y="650"
+                        width="1296"
+                        height="300"
+                        fill="#fff"
+                      />
+                    ) : (
+                      <path
+                        className="signature-pen"
+                        pathLength="1"
+                        d="M 20 800 C 160 720 300 880 460 760 S 720 900 900 750 S 1120 870 1280 790"
+                      />
+                    )}
+                  </mask>
+                </defs>
+                <image
+                  href="/kb-logo.svg"
+                  width="1296"
+                  height="1728"
+                  mask="url(#kb-signature-write)"
+                />
+              </svg>
             </motion.h1>
           </motion.div>
 
