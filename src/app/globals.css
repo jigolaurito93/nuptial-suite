@@ -389,9 +389,7 @@ body {
 }
 
 .envelope-scene--touch .envelope-seal,
-.envelope-scene--touch .envelope-pocket,
-.envelope-scene--touch .envelope-shadow,
-.envelope-scene--touch .envelope-shadow-halo {
+.envelope-scene--touch .envelope-pocket {
   filter: none;
 }
 
@@ -472,31 +470,45 @@ body {
 
 .envelope-shadow-halo {
   position: absolute;
-  inset: -18% -14% -22%;
-  border-radius: 1.2rem;
+  z-index: 0;
+  inset: -26% -20% -32%;
+  pointer-events: none;
+  border-radius: 50%;
   background: radial-gradient(
-    ellipse at 50% 58%,
-    rgba(8, 14, 28, 0.28) 0%,
-    rgba(8, 14, 28, 0.12) 42%,
-    transparent 72%
+    ellipse 68% 52% at 50% 58%,
+    rgba(8, 14, 28, 0.12) 0%,
+    rgba(8, 14, 28, 0.05) 34%,
+    rgba(8, 14, 28, 0.015) 58%,
+    transparent 76%
   );
-  filter: blur(28px);
+  filter: blur(36px);
 }
 
 .envelope-shadow {
   position: absolute;
-  right: 2%;
-  bottom: -12%;
-  left: 2%;
-  height: 26%;
-  border-radius: 100%;
+  z-index: 0;
+  right: 10%;
+  bottom: -6%;
+  left: 10%;
+  height: 18%;
+  pointer-events: none;
+  border-radius: 50%;
   background: radial-gradient(
-    ellipse at center,
-    rgba(8, 14, 28, 0.5) 0%,
-    rgba(8, 14, 28, 0.2) 40%,
-    transparent 74%
+    ellipse at 50% 30%,
+    rgba(8, 14, 28, 0.16) 0%,
+    rgba(8, 14, 28, 0.07) 32%,
+    rgba(8, 14, 28, 0.02) 58%,
+    transparent 78%
   );
-  filter: blur(14px);
+  filter: blur(22px);
+}
+
+.envelope-scene--touch .envelope-shadow-halo {
+  filter: blur(42px);
+}
+
+.envelope-scene--touch .envelope-shadow {
+  filter: blur(28px);
 }
 
 /* Back to front, the stack is: backing (0px), card (1px, rising to 84px once it
@@ -525,9 +537,8 @@ body {
   background: var(--envelope-skin);
   box-shadow:
     inset 0 0 0 1px rgba(212, 175, 55, 0.38),
-    0 4px 10px rgba(8, 14, 28, 0.22),
-    0 18px 28px -10px rgba(8, 14, 28, 0.42),
-    0 36px 48px -16px rgba(8, 14, 28, 0.32);
+    0 12px 28px -12px rgba(8, 14, 28, 0.2),
+    0 28px 44px -18px rgba(8, 14, 28, 0.16);
   transform: translateZ(0);
 }
 
