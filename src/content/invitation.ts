@@ -159,13 +159,18 @@ export const invitation = {
     registries: [
       {
         name: "Crate & Barrel",
-        url: "https://www.crateandbarrel.com/",
-        note: "Sample registry link",
+        url: "https://crateandbarrel.com.ph/pages/wedding-registry",
+        note: "Crate and Barrel Philippines",
       },
       {
         name: "Pottery Barn",
         url: "https://www.potterybarn.com/",
         note: "Sample registry link",
+      },
+      {
+        name: "Rustan's",
+        url: "https://rustans.com/pages/the-registry-by-rustans",
+        note: "The Registry by Rustan's",
       },
     ],
     bank: {
