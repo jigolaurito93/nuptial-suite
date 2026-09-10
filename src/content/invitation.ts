@@ -11,6 +11,15 @@ export const invitation = {
   rsvpByLabel: "8 January 2028",
   saveTheDateEyebrow: "Save the date",
   envelopeHint: "Scroll to open the envelope",
+  passwordGate: {
+    eyebrow: "Private invitation",
+    prompt: "Enter the password shared with you to open our invitation.",
+    placeholder: "Password",
+    submit: "Open invitation",
+    submitting: "Opening…",
+    revealingEyebrow: "Welcome",
+    error: "That password does not match. Please try again.",
+  },
   message:
     "With joyful hearts, we invite you to celebrate our wedding day with us.",
   heroImage: {

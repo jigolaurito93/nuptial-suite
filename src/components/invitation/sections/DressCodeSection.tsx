@@ -39,7 +39,9 @@ export function DressCodeSection() {
   );
 }
 
-type OutfitLook = (typeof invitation.dressCode.gentlemen)[number];
+type OutfitLook =
+  | (typeof invitation.dressCode.gentlemen)[number]
+  | (typeof invitation.dressCode.ladies)[number];
 
 function OutfitGroup({
   heading,

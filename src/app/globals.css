@@ -918,3 +918,96 @@ body {
     height: 150vh;
   }
 }
+
+html.password-locked,
+html.password-locked body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.password-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #f3eee6;
+}
+
+.password-gate-inner {
+  position: relative;
+  z-index: 1;
+  width: min(28rem, calc(100% - 2.5rem));
+  text-align: center;
+}
+
+.password-form,
+.password-reveal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.password-form--shake {
+  animation: password-shake 0.42s ease;
+}
+
+.password-bloom {
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 46vmax;
+  height: 46vmax;
+  margin: -23vmax 0 0 -23vmax;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgba(240, 224, 176, 0.95) 0%,
+    rgba(212, 175, 55, 0.38) 36%,
+    transparent 72%
+  );
+  filter: blur(10px);
+}
+
+.password-seal {
+  position: relative;
+  width: 6.5rem;
+  height: 6.5rem;
+  margin-bottom: 1.25rem;
+  filter: drop-shadow(0 1px 0 rgba(255, 236, 180, 0.35))
+    drop-shadow(0 10px 18px rgba(20, 12, 4, 0.28));
+}
+
+.password-seal-img {
+  display: block;
+  object-fit: contain;
+}
+
+@keyframes password-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-10px);
+  }
+  40% {
+    transform: translateX(10px);
+  }
+  60% {
+    transform: translateX(-6px);
+  }
+  80% {
+    transform: translateX(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .password-form--shake {
+    animation: none;
+  }
+}
