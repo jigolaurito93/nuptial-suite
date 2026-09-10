@@ -122,6 +122,64 @@ export const invitation = {
     title: "Garden formal",
     description:
       "Soft neutrals, sage, ivory, and muted florals. Gentlemen in light suits or barong; ladies in midi or floor-length dresses. Kindly avoid white and overly bright neons.",
+    palette: [
+      { name: "Sage", hex: "#7a8a78" },
+      { name: "Ivory", hex: "#e8e2d6" },
+      { name: "Sand", hex: "#c4b49a" },
+      { name: "Taupe", hex: "#9c8b76" },
+    ],
+    gentlemen: [
+      {
+        title: "Sage linen suit",
+        detail: "Unstructured sage, ivory open collar, and loafers.",
+        image: {
+          src: "/images/attire/men-sage-suit.png",
+          alt: "Garden-formal sage linen suit with an ivory shirt and tan loafers",
+        },
+      },
+      {
+        title: "Ivory barong",
+        detail: "Cream barong with sage embroidery and taupe trousers.",
+        image: {
+          src: "/images/attire/men-barong.png",
+          alt: "Ivory barong with sage embroidery, taupe trousers, and brown loafers",
+        },
+      },
+      {
+        title: "Stone suit",
+        detail: "Light sand suit with a sage shirt and suede loafers.",
+        image: {
+          src: "/images/attire/men-stone-suit.png",
+          alt: "Light stone suit with a sage shirt and brown suede loafers",
+        },
+      },
+    ],
+    ladies: [
+      {
+        title: "Sage midi",
+        detail: "Dusty sage midi with comfortable block heels.",
+        image: {
+          src: "/images/attire/women-sage-midi.png",
+          alt: "Sage midi wrap dress with nude block-heel sandals",
+        },
+      },
+      {
+        title: "Muted floral",
+        detail: "Floor-length chiffon in sage, ivory, and taupe blooms.",
+        image: {
+          src: "/images/attire/women-muted-floral.png",
+          alt: "Floor-length muted floral dress in sage, ivory, and taupe",
+        },
+      },
+      {
+        title: "Taupe with wrap",
+        detail: "Floor-length taupe with a sage shawl for evening.",
+        image: {
+          src: "/images/attire/women-taupe-wrap.png",
+          alt: "Floor-length taupe dress with a light sage wrap and block heels",
+        },
+      },
+    ],
     notes: [
       "Comfortable shoes recommended for chapel grounds",
       "Light wrap or shawl for Tagaytay evenings",
@@ -207,7 +265,7 @@ export const invitation = {
     {
       question: "Are there any colors I should avoid wearing?",
       answer:
-        "Kindly avoid white, ivory, and overly bright neons so the couple can stand out in photos. Soft neutrals, sage, and muted florals are a lovely choice.",
+        "Kindly avoid white and overly bright neons so the couple can stand out in photos. Soft neutrals, sage, ivory, and muted florals are a lovely choice.",
     },
     {
       question: "What is the weather like in February?",
