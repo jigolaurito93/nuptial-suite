@@ -1,12 +1,19 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import { GuestNameFields } from "@/components/admin/GuestNameFields";
 import {
   adminInputClassName,
   adminPrimaryButtonClassName,
   adminSecondaryButtonClassName,
 } from "@/components/admin/formStyles";
 import { hasSupabaseEnv } from "@/lib/env";
+import {
+  emptyNamePrefixChoice,
+  formatGuestDisplayName,
+  resolvedNamePrefix,
+  type NamePrefixChoice,
+} from "@/lib/guest-name";
 import {
   householdStatus,
   inviteLink,
@@ -20,7 +27,16 @@ import type { Guest, GuestRow, Household, HouseholdRow } from "@/types";
 
 type HouseholdWithGuests = Household & { guests: Guest[] };
 
+type NamedGuestDraft = {
+  prefix: NamePrefixChoice;
+  name: string;
+};
+
 type FormMode = "create" | "edit";
+
+function emptyNamedGuestDraft(): NamedGuestDraft {
+  return { prefix: emptyNamePrefixChoice(), name: "" };
+}
 
 function plusOnesCopy(allowed: number) {
   if (allowed === 0) return "No plus-ones";
@@ -35,13 +51,16 @@ export function HouseholdsSection() {
   const [errorMessage, setErrorMessage] = useState("");
   const [label, setLabel] = useState("");
   const [plusOnesAllowed, setPlusOnesAllowed] = useState(0);
-  const [namedNames, setNamedNames] = useState<string[]>([""]);
+  const [namedGuests, setNamedGuests] = useState<NamedGuestDraft[]>([
+    emptyNamedGuestDraft(),
+  ]);
   const [mode, setMode] = useState<FormMode>("create");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [addGuestHouseholdId, setAddGuestHouseholdId] = useState<string | null>(
     null,
   );
   const [addGuestName, setAddGuestName] = useState("");
+  const [addGuestPrefix, setAddGuestPrefix] = useState(emptyNamePrefixChoice());
   const [saving, setSaving] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [reloadToken, setReloadToken] = useState(0);
@@ -86,7 +105,7 @@ export function HouseholdsSection() {
   function resetForm() {
     setLabel("");
     setPlusOnesAllowed(0);
-    setNamedNames([""]);
+    setNamedGuests([emptyNamedGuestDraft()]);
     setMode("create");
     setEditingId(null);
   }
@@ -100,11 +119,6 @@ export function HouseholdsSection() {
     setEditingId(household.id);
     setLabel(household.label);
     setPlusOnesAllowed(household.plusOnesAllowed);
-    setNamedNames(
-      household.guests
-        .filter((guest) => !guest.isPlusOne)
-        .map((guest) => guest.fullName),
-    );
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -120,7 +134,12 @@ export function HouseholdsSection() {
     const allowed = Number.isFinite(plusOnesAllowed)
       ? Math.max(0, Math.floor(plusOnesAllowed))
       : 0;
-    const names = namedNames.map((name) => name.trim()).filter(Boolean);
+    const names = namedGuests
+      .map((guest) => ({
+        fullName: guest.name.trim(),
+        namePrefix: resolvedNamePrefix(guest.prefix),
+      }))
+      .filter((guest) => guest.fullName);
 
     if (mode === "create" && names.length === 0) {
       setErrorMessage("Add at least one named guest.");
@@ -176,9 +195,10 @@ export function HouseholdsSection() {
         }
 
         const { error: guestError } = await supabase.from("guests").insert(
-          names.map((fullName) => ({
+          names.map((guest) => ({
             household_id: householdId,
-            full_name: fullName,
+            full_name: guest.fullName,
+            name_prefix: guest.namePrefix,
             is_plus_one: false,
           })),
         );
@@ -211,6 +231,7 @@ export function HouseholdsSection() {
     const { error } = await supabase.from("guests").insert({
       household_id: household.id,
       full_name: name,
+      name_prefix: resolvedNamePrefix(addGuestPrefix),
       is_plus_one: false,
     });
 
@@ -221,6 +242,7 @@ export function HouseholdsSection() {
 
     setAddGuestHouseholdId(null);
     setAddGuestName("");
+    setAddGuestPrefix(emptyNamePrefixChoice());
     reload();
   }
 
@@ -338,27 +360,37 @@ export function HouseholdsSection() {
               </label>
 
               {mode === "create" ? (
-                <fieldset className="space-y-3">
+                <fieldset className="space-y-6">
                   <legend className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
                     Named guests
                   </legend>
-                  {namedNames.map((name, index) => (
-                    <input
+                  {namedGuests.map((guest, index) => (
+                    <GuestNameFields
                       key={index}
-                      required={index === 0}
-                      value={name}
-                      onChange={(event) => {
-                        const next = [...namedNames];
-                        next[index] = event.target.value;
-                        setNamedNames(next);
+                      prefix={guest.prefix}
+                      onPrefixChange={(prefix) => {
+                        const next = [...namedGuests];
+                        next[index] = { ...next[index], prefix };
+                        setNamedGuests(next);
                       }}
-                      placeholder="Full name"
-                      className={adminInputClassName}
+                      fullName={guest.name}
+                      onFullNameChange={(name) => {
+                        const next = [...namedGuests];
+                        next[index] = { ...next[index], name };
+                        setNamedGuests(next);
+                      }}
+                      nameRequired={index === 0}
+                      namePlaceholder="Full name"
                     />
                   ))}
                   <button
                     type="button"
-                    onClick={() => setNamedNames((current) => [...current, ""])}
+                    onClick={() =>
+                      setNamedGuests((current) => [
+                        ...current,
+                        emptyNamedGuestDraft(),
+                      ])
+                    }
                     className="text-sm underline underline-offset-4"
                   >
                     Add another named guest
@@ -426,13 +458,26 @@ export function HouseholdsSection() {
                             {plusOnesCopy(household.plusOnesAllowed)}
                           </p>
                           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-                            {named.map((guest) => guest.fullName).join(", ") ||
-                              "No named guests"}
+                            {named
+                              .map((guest) =>
+                                formatGuestDisplayName(
+                                  guest.fullName,
+                                  guest.namePrefix,
+                                ),
+                              )
+                              .join(", ") || "No named guests"}
                           </p>
                           {plusOnes.length > 0 ? (
                             <p className="mt-1 text-sm text-zinc-500">
                               Plus-ones:{" "}
-                              {plusOnes.map((guest) => guest.fullName).join(", ")}
+                              {plusOnes
+                                .map((guest) =>
+                                  formatGuestDisplayName(
+                                    guest.fullName,
+                                    guest.namePrefix,
+                                  ),
+                                )
+                                .join(", ")}
                             </p>
                           ) : null}
                           {household.contactNumber ? (
@@ -468,6 +513,7 @@ export function HouseholdsSection() {
                             onClick={() => {
                               setAddGuestHouseholdId(household.id);
                               setAddGuestName("");
+                              setAddGuestPrefix(emptyNamePrefixChoice());
                             }}
                             className="underline underline-offset-4"
                           >
@@ -484,36 +530,39 @@ export function HouseholdsSection() {
                       </div>
                       {addGuestHouseholdId === household.id ? (
                         <form
-                          className="mt-4 flex flex-wrap gap-3"
+                          className="mt-4 space-y-4"
                           onSubmit={(event) => {
                             event.preventDefault();
                             void onAddNamedGuest(household);
                           }}
                         >
-                          <input
-                            value={addGuestName}
-                            onChange={(event) =>
-                              setAddGuestName(event.target.value)
-                            }
-                            placeholder="Named guest"
-                            className={`${adminInputClassName} mt-0 max-w-xs`}
+                          <GuestNameFields
+                            compact
+                            prefix={addGuestPrefix}
+                            onPrefixChange={setAddGuestPrefix}
+                            fullName={addGuestName}
+                            onFullNameChange={setAddGuestName}
+                            namePlaceholder="Named guest"
                           />
-                          <button
-                            type="submit"
-                            className={adminPrimaryButtonClassName}
-                          >
-                            Save guest
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setAddGuestHouseholdId(null);
-                              setAddGuestName("");
-                            }}
-                            className={adminSecondaryButtonClassName}
-                          >
-                            Cancel
-                          </button>
+                          <div className="flex flex-wrap gap-3">
+                            <button
+                              type="submit"
+                              className={adminPrimaryButtonClassName}
+                            >
+                              Save guest
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setAddGuestHouseholdId(null);
+                                setAddGuestName("");
+                                setAddGuestPrefix(emptyNamePrefixChoice());
+                              }}
+                              className={adminSecondaryButtonClassName}
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         </form>
                       ) : null}
                     </article>

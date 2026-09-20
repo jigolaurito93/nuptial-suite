@@ -1,12 +1,20 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import { GuestNameFields } from "@/components/admin/GuestNameFields";
 import {
   adminInputClassName,
   adminPrimaryButtonClassName,
   adminSecondaryButtonClassName,
 } from "@/components/admin/formStyles";
 import { hasSupabaseEnv } from "@/lib/env";
+import {
+  emptyNamePrefixChoice,
+  formatGuestDisplayName,
+  prefixChoiceFromValue,
+  resolvedNamePrefix,
+  type NamePrefixChoice,
+} from "@/lib/guest-name";
 import {
   mapGuestRow,
   mapHouseholdRow,
@@ -31,6 +39,9 @@ export function GuestsSection() {
   const [loading, setLoading] = useState(configured);
   const [errorMessage, setErrorMessage] = useState("");
   const [fullName, setFullName] = useState("");
+  const [namePrefix, setNamePrefix] = useState<NamePrefixChoice>(
+    emptyNamePrefixChoice(),
+  );
   const [householdId, setHouseholdId] = useState("");
   const [newHouseholdLabel, setNewHouseholdLabel] = useState("");
   const [rsvpStatus, setRsvpStatus] = useState<InviteRsvpStatus>("pending");
@@ -92,6 +103,7 @@ export function GuestsSection() {
 
   function resetForm() {
     setFullName("");
+    setNamePrefix(emptyNamePrefixChoice());
     setHouseholdId("");
     setNewHouseholdLabel("");
     setRsvpStatus("pending");
@@ -107,6 +119,7 @@ export function GuestsSection() {
     setMode("edit");
     setEditingId(guest.id);
     setFullName(guest.fullName);
+    setNamePrefix(prefixChoiceFromValue(guest.namePrefix));
     setHouseholdId(guest.householdId);
     setNewHouseholdLabel("");
     setRsvpStatus(guest.rsvpStatus);
@@ -133,6 +146,7 @@ export function GuestsSection() {
           .from("guests")
           .update({
             full_name: name,
+            name_prefix: resolvedNamePrefix(namePrefix),
             rsvp_status: rsvpStatus,
           })
           .eq("id", editingId);
@@ -169,6 +183,7 @@ export function GuestsSection() {
         const { error } = await supabase.from("guests").insert({
           household_id: targetHouseholdId,
           full_name: name,
+          name_prefix: resolvedNamePrefix(namePrefix),
           is_plus_one: false,
           rsvp_status: rsvpStatus,
         });
@@ -200,7 +215,11 @@ export function GuestsSection() {
       }
     }
 
-    if (!window.confirm(`Remove ${guest.fullName} from the guest list?`)) {
+    if (
+      !window.confirm(
+        `Remove ${formatGuestDisplayName(guest.fullName, guest.namePrefix)} from the guest list?`,
+      )
+    ) {
       return;
     }
 
@@ -236,17 +255,12 @@ export function GuestsSection() {
         ) : (
           <>
             <form onSubmit={onSubmit} className="mt-10 space-y-6">
-              <label className="block">
-                <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
-                  Full name
-                </span>
-                <input
-                  required
-                  value={fullName}
-                  onChange={(event) => setFullName(event.target.value)}
-                  className={adminInputClassName}
-                />
-              </label>
+              <GuestNameFields
+                prefix={namePrefix}
+                onPrefixChange={setNamePrefix}
+                fullName={fullName}
+                onFullNameChange={setFullName}
+              />
 
               {mode === "create" ? (
                 <>
@@ -346,7 +360,10 @@ export function GuestsSection() {
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
                         <h3 className="text-lg font-medium tracking-tight">
-                          {guest.fullName}
+                          {formatGuestDisplayName(
+                            guest.fullName,
+                            guest.namePrefix,
+                          )}
                         </h3>
                         <p className="mt-1 text-sm text-zinc-500">
                           {guest.householdLabel}

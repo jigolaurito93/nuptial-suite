@@ -66,6 +66,7 @@ function isInviteRsvpStatus(value: unknown): value is InviteRsvpStatus {
 function mapPublicGuest(row: {
   id: unknown;
   full_name: unknown;
+  name_prefix?: unknown;
   is_plus_one: unknown;
   rsvp_status: unknown;
 }): PublicGuest | null {
@@ -77,6 +78,10 @@ function mapPublicGuest(row: {
   return {
     id: row.id,
     fullName: row.full_name,
+    namePrefix:
+      typeof row.name_prefix === "string" && row.name_prefix.trim()
+        ? row.name_prefix.trim()
+        : null,
     isPlusOne: Boolean(row.is_plus_one),
     rsvpStatus: row.rsvp_status,
   };
@@ -89,6 +94,7 @@ function parseLookupGuests(value: unknown): PublicGuest[] {
     const guest = mapPublicGuest(row as {
       id: unknown;
       full_name: unknown;
+      name_prefix?: unknown;
       is_plus_one: unknown;
       rsvp_status: unknown;
     });
@@ -125,6 +131,7 @@ export function mapGuestRow(row: GuestRow): Guest {
     id: row.id,
     householdId: row.household_id,
     fullName: row.full_name,
+    namePrefix: row.name_prefix?.trim() || null,
     isPlusOne: row.is_plus_one,
     rsvpStatus: row.rsvp_status,
     createdAt: row.created_at,

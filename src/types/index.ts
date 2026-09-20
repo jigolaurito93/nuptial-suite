@@ -11,6 +11,7 @@ export type HouseholdRsvpStatus =
 export type PublicGuest = {
   id: string;
   fullName: string;
+  namePrefix: string | null;
   isPlusOne: boolean;
   rsvpStatus: InviteRsvpStatus;
 };
@@ -59,6 +60,7 @@ export type Guest = {
   id: string;
   householdId: string;
   fullName: string;
+  namePrefix: string | null;
   isPlusOne: boolean;
   rsvpStatus: InviteRsvpStatus;
   createdAt: string;
@@ -69,6 +71,7 @@ export type GuestRow = {
   id: string;
   household_id: string;
   full_name: string;
+  name_prefix?: string | null;
   is_plus_one: boolean;
   rsvp_status: InviteRsvpStatus;
   created_at: string;

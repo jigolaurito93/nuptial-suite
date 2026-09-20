@@ -2,6 +2,7 @@
 
 import { useMemo, useState, type FormEvent } from "react";
 import { plusOneAllowanceCopy } from "@/lib/invite";
+import { formatGuestDisplayName } from "@/lib/guest-name";
 import type { PublicInvite, RsvpPayload, RsvpStatus } from "@/types";
 
 type FormState = "idle" | "submitting" | "success" | "error";
@@ -158,7 +159,7 @@ export function RsvpForm({ invite, inviteCode, onSuccess }: RsvpFormProps) {
               className="flex items-center justify-between gap-4 border-b border-border pb-3"
             >
               <span>
-                {guest.fullName}
+                {formatGuestDisplayName(guest.fullName, guest.namePrefix)}
                 {guest.isPlusOne ? (
                   <span className="text-muted"> (plus-one)</span>
                 ) : null}
@@ -193,7 +194,9 @@ export function RsvpForm({ invite, inviteCode, onSuccess }: RsvpFormProps) {
         </legend>
         {named.map((guest) => (
           <div key={guest.id}>
-            <p className="text-sm text-foreground">{guest.fullName}</p>
+            <p className="text-sm text-foreground">
+              {formatGuestDisplayName(guest.fullName, guest.namePrefix)}
+            </p>
             <div className="mt-3 grid grid-cols-2 gap-3">
               {(
                 [
