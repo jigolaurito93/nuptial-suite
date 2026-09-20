@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { AdminSectionHeading } from "@/components/admin/AdminSectionHeading";
+import { adminLinkClassName } from "@/components/admin/formStyles";
 import { hasSupabaseEnv } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -14,32 +16,27 @@ export default async function LoginPage() {
   }
 
   return (
-    <main className="flex-1">
-      <section className="mx-auto w-full max-w-3xl px-6 py-16">
-        <p className="text-sm tracking-wide text-zinc-500 uppercase">
-          Couple access
+    <div className="admin-shell flex min-h-full flex-1 flex-col">
+      <main className="flex-1">
+        <section className="mx-auto w-full max-w-3xl px-6 py-16">
+          <AdminSectionHeading
+            heading="h1"
+            eyebrow="Couple access"
+            title="Sign in"
+            description={
+              hasSupabaseEnv()
+                ? "Use the email and password created for the bride and groom in Supabase Authentication."
+                : "Couple login is unavailable until Supabase environment variables are configured."
+            }
+          />
+          {hasSupabaseEnv() ? <LoginForm /> : null}
+        </section>
+        <p className="mx-auto max-w-3xl px-6 pb-16">
+          <Link href="/" className={adminLinkClassName}>
+            Back to invitation
+          </Link>
         </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">Sign in</h1>
-        {hasSupabaseEnv() ? (
-          <>
-            <p className="mt-4 max-w-xl text-zinc-600 dark:text-zinc-400">
-              Use the email and password created for the bride and groom in
-              Supabase Authentication.
-            </p>
-            <LoginForm />
-          </>
-        ) : (
-          <p className="mt-4 max-w-xl text-zinc-600 dark:text-zinc-400">
-            Couple login is unavailable until Supabase environment variables are
-            configured.
-          </p>
-        )}
-      </section>
-      <p className="mx-auto max-w-3xl px-6 pb-16 text-sm text-zinc-500">
-        <Link href="/" className="underline underline-offset-4">
-          Back to invitation
-        </Link>
-      </p>
-    </main>
+      </main>
+    </div>
   );
 }

@@ -20,7 +20,7 @@ export function SignOutButton() {
     <button
       type="button"
       onClick={() => void onSignOut()}
-      className="text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50"
+      className="tracking-[0.18em] text-muted uppercase transition hover:text-foreground"
     >
       Sign out
     </button>

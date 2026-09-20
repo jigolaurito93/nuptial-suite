@@ -1,6 +1,6 @@
 "use client";
 
-import { adminInputClassName } from "@/components/admin/formStyles";
+import { adminInputClassName, adminLabelClassName } from "@/components/admin/formStyles";
 import {
   CUSTOM_PREFIX_VALUE,
   GUEST_PREFIX_OPTIONS,
@@ -34,7 +34,7 @@ export function GuestNameFields({
     <div className="space-y-3">
       {prefix.selected === CUSTOM_PREFIX_VALUE ? (
         <label className={compact ? "block max-w-xs" : "block"}>
-          <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+          <span className={adminLabelClassName}>
             Custom prefix
           </span>
           <input
@@ -50,7 +50,7 @@ export function GuestNameFields({
 
       <div className="flex min-w-0 flex-wrap gap-3 sm:flex-nowrap">
         <label className="block w-full shrink-0 sm:w-36">
-          <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+          <span className={adminLabelClassName}>
             Prefix
           </span>
           <select
@@ -74,7 +74,7 @@ export function GuestNameFields({
         </label>
 
         <label className="block min-w-0 flex-1">
-          <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+          <span className={adminLabelClassName}>
             Full name
           </span>
           <input

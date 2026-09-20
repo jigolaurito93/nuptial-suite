@@ -2,8 +2,15 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { AdminModal } from "@/components/admin/AdminModal";
+import { AdminSectionHeading } from "@/components/admin/AdminSectionHeading";
 import {
+  adminErrorClassName,
   adminInputClassName,
+  adminItemTitleClassName,
+  adminLabelClassName,
+  adminLinkClassName,
+  adminListClassName,
+  adminMutedTextClassName,
   adminPrimaryButtonClassName,
   adminSecondaryButtonClassName,
 } from "@/components/admin/formStyles";
@@ -459,17 +466,15 @@ export function VendorsPage() {
   return (
     <main className="flex-1">
       <section className="mx-auto w-full max-w-3xl px-6 py-16">
-        <p className="text-sm tracking-wide text-zinc-500 uppercase">Vendors</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-          Contacts and payments
-        </h1>
-        <p className="mt-4 max-w-xl text-zinc-600 dark:text-zinc-400">
-          Keep each vendor’s role, company, and contact in one place. Add a
-          payment schedule when you have a downpayment or remaining balance.
-        </p>
+        <AdminSectionHeading
+          heading="h1"
+          eyebrow="Vendors"
+          title="Contacts and payments"
+          description="Keep each vendor’s role, company, and contact in one place. Add a payment schedule when you have a downpayment or remaining balance."
+        />
 
         {!configured ? (
-          <p className="mt-8 text-sm text-zinc-600 dark:text-zinc-400">
+          <p className={`mt-8 ${adminMutedTextClassName}`}>
             Connect Supabase to manage vendors.
           </p>
         ) : (
@@ -485,16 +490,14 @@ export function VendorsPage() {
             </div>
 
             {errorMessage && !formOpen ? (
-              <p className="mt-6 text-sm text-red-700" role="alert">
+              <p className={`mt-6 ${adminErrorClassName}`} role="alert">
                 {errorMessage}
               </p>
             ) : null}
 
-            <div className="mt-12 space-y-2 text-sm text-zinc-500">
-              {loading ? (
-                <p>Loading vendor totals…</p>
-              ) : vendors.length === 0 ? null : (
-                <>
+            {loading || vendors.length === 0 ? null : (
+              <div className="mt-10 border border-border bg-surface px-5 py-4">
+                <div className={`space-y-1 ${adminMutedTextClassName}`}>
                   <p>
                     Remaining {formatPhp(overview.remaining)}
                     {" · "}
@@ -510,13 +513,13 @@ export function VendorsPage() {
                     {" · "}
                     Next: {nextDueCopy}
                   </p>
-                </>
-              )}
-            </div>
+                </div>
+              </div>
+            )}
 
             <div className="mt-8">
               <label className="block max-w-xs">
-                <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                <span className={adminLabelClassName}>
                   Role
                 </span>
                 <select
@@ -534,11 +537,13 @@ export function VendorsPage() {
               </label>
             </div>
 
-            <div className="mt-12 divide-y divide-zinc-200 border-y border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+            <div className={`mt-12 ${adminListClassName}`}>
               {loading ? (
-                <p className="py-6 text-sm text-zinc-500">Loading vendors…</p>
+                <p className={`py-6 ${adminMutedTextClassName}`}>
+                  Loading vendors…
+                </p>
               ) : filteredVendors.length === 0 ? (
-                <p className="py-6 text-sm text-zinc-500">
+                <p className={`py-6 ${adminMutedTextClassName}`}>
                   {vendors.length === 0
                     ? "No vendors yet. Add a photographer, caterer, or venue to keep contacts and payments together."
                     : "No vendors match this role."}
@@ -549,41 +554,41 @@ export function VendorsPage() {
                   const payments = sortedPayments(vendor.payments);
                   return (
                     <article key={vendor.id} className="py-6">
-                      <p className="text-sm tracking-wide text-zinc-500 uppercase">
+                      <p className={`${adminLabelClassName} text-accent`}>
                         {vendor.category}
                       </p>
                       <div className="mt-1 flex flex-wrap items-start justify-between gap-4">
                         <div>
-                          <h2 className="text-lg font-medium tracking-tight">
+                          <h2 className={adminItemTitleClassName}>
                             {vendor.companyName}
                           </h2>
-                          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                          <p className={`mt-1 ${adminMutedTextClassName}`}>
                             {vendor.contactName}
                             {" · "}
                             {vendorStatusLabel(vendor.status)}
                           </p>
                           {vendor.phone ? (
-                            <p className="mt-1 text-sm text-zinc-500">
+                            <p className={`mt-1 ${adminMutedTextClassName}`}>
                               <a
                                 href={telHref(vendor.phone)}
-                                className="underline underline-offset-4"
+                                className={adminLinkClassName}
                               >
                                 {vendor.phone}
                               </a>
                             </p>
                           ) : null}
                           {vendor.email ? (
-                            <p className="mt-1 text-sm text-zinc-500">
+                            <p className={`mt-1 ${adminMutedTextClassName}`}>
                               <a
                                 href={`mailto:${vendor.email}`}
-                                className="underline underline-offset-4"
+                                className={adminLinkClassName}
                               >
                                 {vendor.email}
                               </a>
                             </p>
                           ) : null}
                           {vendor.notes ? (
-                            <p className="mt-3 max-w-xl text-sm text-zinc-600 dark:text-zinc-400">
+                            <p className={`mt-3 max-w-xl ${adminMutedTextClassName}`}>
                               {vendor.notes}
                             </p>
                           ) : null}
@@ -592,14 +597,14 @@ export function VendorsPage() {
                           <button
                             type="button"
                             onClick={() => startEdit(vendor)}
-                            className="underline underline-offset-4"
+                            className={adminLinkClassName}
                           >
                             Edit
                           </button>
                           <button
                             type="button"
                             onClick={() => void onDelete(vendor)}
-                            className="underline underline-offset-4"
+                            className={adminLinkClassName}
                           >
                             Delete
                           </button>
@@ -608,7 +613,7 @@ export function VendorsPage() {
 
                       {payments.length > 0 || totals.contractTotal != null ? (
                         <div className="mt-4 space-y-2 text-sm">
-                          <p className="text-zinc-500">
+                          <p className={adminMutedTextClassName}>
                             Paid {formatPhp(totals.paid)}
                             {totals.contractTotal != null
                               ? ` of ${formatPhp(totals.contractTotal)}`
@@ -631,8 +636,8 @@ export function VendorsPage() {
                                 <p
                                   className={
                                     overdue
-                                      ? "text-red-700"
-                                      : "text-zinc-600 dark:text-zinc-400"
+                                      ? "text-red-800"
+                                      : "text-muted"
                                   }
                                 >
                                   {payment.label}
@@ -646,7 +651,7 @@ export function VendorsPage() {
                                     type="button"
                                     disabled={markingId === payment.id}
                                     onClick={() => void onMarkPaid(payment)}
-                                    className="text-sm underline underline-offset-4 disabled:opacity-60"
+                                    className={`${adminLinkClassName} disabled:opacity-60`}
                                   >
                                     {markingId === payment.id
                                       ? "Saving…"
@@ -671,7 +676,7 @@ export function VendorsPage() {
             >
               <form onSubmit={onSubmit} className="space-y-6">
                 <label className="block">
-                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                  <span className={adminLabelClassName}>
                     Role
                   </span>
                   <select
@@ -693,7 +698,7 @@ export function VendorsPage() {
 
                 {category === OTHER_VENDOR_CATEGORY ? (
                   <label className="block">
-                    <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                    <span className={adminLabelClassName}>
                       Custom role
                     </span>
                     <input
@@ -707,7 +712,7 @@ export function VendorsPage() {
                 ) : null}
 
                 <label className="block">
-                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                  <span className={adminLabelClassName}>
                     Company
                   </span>
                   <input
@@ -720,7 +725,7 @@ export function VendorsPage() {
                 </label>
 
                 <label className="block">
-                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                  <span className={adminLabelClassName}>
                     Contact person
                   </span>
                   <input
@@ -733,7 +738,7 @@ export function VendorsPage() {
                 </label>
 
                 <label className="block">
-                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                  <span className={adminLabelClassName}>
                     Phone
                   </span>
                   <input
@@ -746,7 +751,7 @@ export function VendorsPage() {
                 </label>
 
                 <label className="block">
-                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                  <span className={adminLabelClassName}>
                     Email
                   </span>
                   <input
@@ -759,7 +764,7 @@ export function VendorsPage() {
                 </label>
 
                 <label className="block">
-                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                  <span className={adminLabelClassName}>
                     Description
                   </span>
                   <textarea
@@ -772,7 +777,7 @@ export function VendorsPage() {
                 </label>
 
                 <label className="block">
-                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                  <span className={adminLabelClassName}>
                     Status
                   </span>
                   <select
@@ -789,7 +794,7 @@ export function VendorsPage() {
                 </label>
 
                 <label className="block">
-                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                  <span className={adminLabelClassName}>
                     Contract total
                   </span>
                   <input
@@ -804,20 +809,20 @@ export function VendorsPage() {
                 </label>
 
                 <fieldset className="space-y-4">
-                  <legend className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                  <legend className={adminLabelClassName}>
                     Payment schedule
                   </legend>
-                  <p className="text-sm text-zinc-500">
+                  <p className={adminMutedTextClassName}>
                     Optional. Add a downpayment, remaining balance, or any
                     installment with due and paid dates.
                   </p>
                   {paymentDrafts.map((draft, index) => (
                     <div
                       key={draft.key}
-                      className="space-y-4 border border-zinc-200 px-4 py-4 dark:border-zinc-800"
+                      className="space-y-4 border border-border bg-background px-4 py-4"
                     >
                       <label className="block">
-                        <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                        <span className={adminLabelClassName}>
                           Label
                         </span>
                         <input
@@ -832,7 +837,7 @@ export function VendorsPage() {
                         />
                       </label>
                       <label className="block">
-                        <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                        <span className={adminLabelClassName}>
                           Amount
                         </span>
                         <input
@@ -850,7 +855,7 @@ export function VendorsPage() {
                       </label>
                       <div className="grid gap-4 sm:grid-cols-2">
                         <label className="block">
-                          <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                          <span className={adminLabelClassName}>
                             Due date
                           </span>
                           <input
@@ -865,7 +870,7 @@ export function VendorsPage() {
                           />
                         </label>
                         <label className="block">
-                          <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                          <span className={adminLabelClassName}>
                             Paid date
                           </span>
                           <input
@@ -887,7 +892,7 @@ export function VendorsPage() {
                             current.filter((row) => row.key !== draft.key),
                           )
                         }
-                        className="text-sm underline underline-offset-4"
+                        className={adminLinkClassName}
                       >
                         Remove payment
                       </button>
@@ -901,14 +906,14 @@ export function VendorsPage() {
                         emptyPaymentDraft(current.length),
                       ])
                     }
-                    className="text-sm underline underline-offset-4"
+                    className={adminLinkClassName}
                   >
                     Add payment
                   </button>
                 </fieldset>
 
                 {errorMessage ? (
-                  <p className="text-sm text-red-700" role="alert">
+                  <p className={adminErrorClassName} role="alert">
                     {errorMessage}
                   </p>
                 ) : null}

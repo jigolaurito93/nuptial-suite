@@ -4,10 +4,22 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { AdminModal } from "@/components/admin/AdminModal";
 import { GuestNameFields } from "@/components/admin/GuestNameFields";
 import {
+  adminCompactButtonActiveClassName,
+  adminCompactButtonClassName,
+  adminCompactSelectClassName,
+  adminErrorClassName,
   adminInputClassName,
+  adminItemTitleClassName,
+  adminLabelClassName,
+  adminLinkClassName,
+  adminListClassName,
+  adminMutedTextClassName,
   adminPrimaryButtonClassName,
   adminSecondaryButtonClassName,
+  adminSectionClassName,
+  adminSectionInnerClassName,
 } from "@/components/admin/formStyles";
+import { AdminSectionHeading } from "@/components/admin/AdminSectionHeading";
 import { hasSupabaseEnv } from "@/lib/env";
 import {
   emptyNamePrefixChoice,
@@ -46,11 +58,7 @@ const PAGE_SIZE_OPTIONS: { value: PageSize; label: string }[] = [
   { value: "all", label: "All" },
 ];
 
-const compactControlClassName =
-  "border border-zinc-300 px-3 py-2 text-xs tracking-[0.18em] uppercase disabled:opacity-40 dark:border-zinc-700";
-
-const compactSelectClassName =
-  "border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 outline-none focus:border-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-50";
+const compactSelectClassName = adminCompactSelectClassName;
 
 function guestCountLabel(visible: number, total: number, filtered: boolean) {
   if (!filtered) {
@@ -89,12 +97,12 @@ function HeadcountPager({
         type="button"
         disabled={page <= 1}
         onClick={() => onPageChange(page - 1)}
-        className={compactControlClassName}
+        className={adminCompactButtonClassName}
       >
         Previous
       </button>
-      <label className="flex items-center gap-2 text-sm text-zinc-500">
-        <span className="text-xs tracking-[0.18em] uppercase">Page</span>
+      <label className={`flex items-center gap-2 ${adminMutedTextClassName}`}>
+        <span className={adminLabelClassName}>Page</span>
         <select
           value={page}
           onChange={(event) => onPageChange(Number(event.target.value))}
@@ -111,7 +119,7 @@ function HeadcountPager({
         type="button"
         disabled={page >= pageCount}
         onClick={() => onPageChange(page + 1)}
-        className={compactControlClassName}
+        className={adminCompactButtonClassName}
       >
         Next
       </button>
@@ -407,23 +415,16 @@ export function GuestsSection() {
   }
 
   return (
-    <section
-      id="guests"
-      className="scroll-mt-24 border-t border-zinc-200 dark:border-zinc-800"
-    >
-      <div className="mx-auto w-full max-w-3xl px-6 py-16">
-        <p className="text-sm tracking-wide text-zinc-500 uppercase">Guests</p>
-        <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-          Headcount
-        </h2>
-        <p className="mt-4 max-w-xl text-zinc-600 dark:text-zinc-400">
-          Every invited person, including reserved plus-one seats that have not
-          been named yet. You can still change RSVPs here after the public
-          deadline.
-        </p>
+    <section id="guests" className={adminSectionClassName}>
+      <div className={adminSectionInnerClassName}>
+        <AdminSectionHeading
+          eyebrow="Guests"
+          title="Headcount"
+          description="Every invited person, including reserved plus-one seats that have not been named yet. You can still change RSVPs here after the public deadline."
+        />
 
         {!configured ? (
-          <p className="mt-8 text-sm text-zinc-600 dark:text-zinc-400">
+          <p className={`mt-8 ${adminMutedTextClassName}`}>
             Connect Supabase to manage guests.
           </p>
         ) : (
@@ -439,7 +440,7 @@ export function GuestsSection() {
             </div>
 
             {errorMessage && !formOpen ? (
-              <p className="mt-6 text-sm text-red-700" role="alert">
+              <p className={`mt-6 ${adminErrorClassName}`} role="alert">
                 {errorMessage}
               </p>
             ) : null}
@@ -447,7 +448,7 @@ export function GuestsSection() {
             <div className="mt-12">
               <div className="grid gap-4 sm:grid-cols-3">
                 <label className="block">
-                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                  <span className={adminLabelClassName}>
                     Family name
                   </span>
                   <input
@@ -464,7 +465,7 @@ export function GuestsSection() {
                   </datalist>
                 </label>
                 <label className="block">
-                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                  <span className={adminLabelClassName}>
                     RSVP
                   </span>
                   <select
@@ -481,7 +482,7 @@ export function GuestsSection() {
                   </select>
                 </label>
                 <label className="block">
-                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                  <span className={adminLabelClassName}>
                     Guest type
                   </span>
                   <select
@@ -499,7 +500,7 @@ export function GuestsSection() {
               </div>
 
               <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
-                <div className="space-y-1 text-sm text-zinc-500">
+                <div className={`space-y-1 ${adminMutedTextClassName}`}>
                   {loading ? (
                     <p>Counting guests…</p>
                   ) : (
@@ -544,7 +545,7 @@ export function GuestsSection() {
                   <button
                     type="button"
                     onClick={clearFilters}
-                    className="text-sm underline underline-offset-4"
+                    className={adminLinkClassName}
                   >
                     Clear filters
                   </button>
@@ -553,7 +554,7 @@ export function GuestsSection() {
 
               <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                  <p className={adminLabelClassName}>
                     Show
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">
@@ -567,8 +568,8 @@ export function GuestsSection() {
                           onClick={() => onPageSizeChange(option.value)}
                           className={
                             selected
-                              ? `${compactControlClassName} border-zinc-950 bg-zinc-950 text-white dark:border-zinc-50 dark:bg-zinc-50 dark:text-zinc-950`
-                              : compactControlClassName
+                              ? adminCompactButtonActiveClassName
+                              : adminCompactButtonClassName
                           }
                         >
                           {option.label}
@@ -586,15 +587,17 @@ export function GuestsSection() {
                 ) : null}
               </div>
 
-              <div className="mt-4 divide-y divide-zinc-200 border-y border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+              <div className={`${adminListClassName} mt-4`}>
                 {loading ? (
-                  <p className="py-6 text-sm text-zinc-500">Loading guests…</p>
+                  <p className={`py-6 ${adminMutedTextClassName}`}>
+                    Loading guests…
+                  </p>
                 ) : headcountPeople.length === 0 ? (
-                  <p className="py-6 text-sm text-zinc-500">
+                  <p className={`py-6 ${adminMutedTextClassName}`}>
                     No guests yet. Add a person or create a household.
                   </p>
                 ) : filteredGuests.length === 0 ? (
-                  <p className="py-6 text-sm text-zinc-500">
+                  <p className={`py-6 ${adminMutedTextClassName}`}>
                     No guests match these filters.
                   </p>
                 ) : (
@@ -602,13 +605,13 @@ export function GuestsSection() {
                     <article key={guest.id} className="py-6">
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
-                          <h3 className="text-lg font-medium tracking-tight">
+                          <h3 className={adminItemTitleClassName}>
                             {formatGuestDisplayName(
                               guest.fullName,
                               guest.namePrefix,
                             )}
                           </h3>
-                          <p className="mt-1 text-sm text-zinc-500">
+                          <p className={`mt-1 ${adminMutedTextClassName}`}>
                             {guest.householdLabel}
                             {" · "}
                             {guest.isPlusOne ? "Plus-one" : "Named guest"}
@@ -622,14 +625,14 @@ export function GuestsSection() {
                             <button
                               type="button"
                               onClick={() => startEdit(guest)}
-                              className="underline underline-offset-4"
+                              className={adminLinkClassName}
                             >
                               Edit
                             </button>
                             <button
                               type="button"
                               onClick={() => void onDelete(guest)}
-                              className="underline underline-offset-4"
+                              className={adminLinkClassName}
                             >
                               Delete
                             </button>
@@ -668,7 +671,7 @@ export function GuestsSection() {
                 {mode === "create" ? (
                   <>
                     <label className="block">
-                      <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                      <span className={adminLabelClassName}>
                         Household
                       </span>
                       <select
@@ -688,7 +691,7 @@ export function GuestsSection() {
                     </label>
                     {!householdId ? (
                       <label className="block">
-                        <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                        <span className={adminLabelClassName}>
                           New household label
                         </span>
                         <input
@@ -706,7 +709,7 @@ export function GuestsSection() {
                 ) : null}
 
                 <label className="block">
-                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                  <span className={adminLabelClassName}>
                     RSVP
                   </span>
                   <select
@@ -723,7 +726,7 @@ export function GuestsSection() {
                 </label>
 
                 {errorMessage ? (
-                  <p className="text-sm text-red-700" role="alert">
+                  <p className={adminErrorClassName} role="alert">
                     {errorMessage}
                   </p>
                 ) : null}

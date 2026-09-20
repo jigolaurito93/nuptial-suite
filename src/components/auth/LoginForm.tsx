@@ -2,6 +2,11 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import {
+  adminInputClassName,
+  adminLabelClassName,
+  adminPrimaryButtonClassName,
+} from "@/components/admin/formStyles";
 import { createClient } from "@/lib/supabase/client";
 
 export function LoginForm() {
@@ -42,7 +47,7 @@ export function LoginForm() {
   return (
     <form onSubmit={onSubmit} className="mt-10 max-w-md space-y-6">
       <label className="block">
-        <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+        <span className={adminLabelClassName}>
           Email
         </span>
         <input
@@ -51,12 +56,12 @@ export function LoginForm() {
           autoComplete="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          className="mt-2 w-full border border-zinc-300 bg-white px-4 py-3 text-zinc-950 outline-none focus:border-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-50"
+          className={adminInputClassName}
         />
       </label>
 
       <label className="block">
-        <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+        <span className={adminLabelClassName}>
           Password
         </span>
         <input
@@ -65,7 +70,7 @@ export function LoginForm() {
           autoComplete="current-password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="mt-2 w-full border border-zinc-300 bg-white px-4 py-3 text-zinc-950 outline-none focus:border-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-50"
+          className={adminInputClassName}
         />
       </label>
 
@@ -78,7 +83,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={submitting}
-        className="w-full border border-zinc-950 bg-zinc-950 px-6 py-3 text-sm tracking-[0.18em] text-white uppercase transition hover:bg-transparent hover:text-zinc-950 disabled:opacity-60 dark:border-zinc-50 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:text-zinc-50"
+        className={`w-full ${adminPrimaryButtonClassName}`}
       >
         {submitting ? "Signing in…" : "Sign in"}
       </button>

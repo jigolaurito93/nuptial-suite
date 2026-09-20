@@ -4,10 +4,19 @@ import { useEffect, useState, type FormEvent } from "react";
 import { AdminModal } from "@/components/admin/AdminModal";
 import { GuestNameFields } from "@/components/admin/GuestNameFields";
 import {
+  adminErrorClassName,
   adminInputClassName,
+  adminItemTitleClassName,
+  adminLabelClassName,
+  adminLinkClassName,
+  adminListClassName,
+  adminMutedTextClassName,
   adminPrimaryButtonClassName,
   adminSecondaryButtonClassName,
+  adminSectionClassName,
+  adminSectionInnerClassName,
 } from "@/components/admin/formStyles";
+import { AdminSectionHeading } from "@/components/admin/AdminSectionHeading";
 import { hasSupabaseEnv } from "@/lib/env";
 import {
   emptyNamePrefixChoice,
@@ -330,24 +339,16 @@ export function HouseholdsSection() {
   }
 
   return (
-    <section
-      id="households"
-      className="scroll-mt-24 border-t border-zinc-200 dark:border-zinc-800"
-    >
-      <div className="mx-auto w-full max-w-3xl px-6 py-16">
-        <p className="text-sm tracking-wide text-zinc-500 uppercase">
-          Households
-        </p>
-        <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-          Invitation cards
-        </h2>
-        <p className="mt-4 max-w-xl text-zinc-600 dark:text-zinc-400">
-          One household is one forever link. Named family members belong here;
-          plus-ones are extra unnamed seats.
-        </p>
+    <section id="households" className={adminSectionClassName}>
+      <div className={adminSectionInnerClassName}>
+        <AdminSectionHeading
+          eyebrow="Households"
+          title="Invitation cards"
+          description="One household is one forever link. Named family members belong here; plus-ones are extra unnamed seats."
+        />
 
         {!configured ? (
-          <p className="mt-8 text-sm text-zinc-600 dark:text-zinc-400">
+          <p className={`mt-8 ${adminMutedTextClassName}`}>
             Connect Supabase to manage households.
           </p>
         ) : (
@@ -363,18 +364,18 @@ export function HouseholdsSection() {
             </div>
 
             {errorMessage && !formOpen && !addGuestHousehold ? (
-              <p className="mt-6 text-sm text-red-700" role="alert">
+              <p className={`mt-6 ${adminErrorClassName}`} role="alert">
                 {errorMessage}
               </p>
             ) : null}
 
-            <div className="mt-12 divide-y divide-zinc-200 border-y border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+            <div className={`mt-12 ${adminListClassName}`}>
               {loading ? (
-                <p className="py-6 text-sm text-zinc-500">
+                <p className={`py-6 ${adminMutedTextClassName}`}>
                   Loading households…
                 </p>
               ) : households.length === 0 ? (
-                <p className="py-6 text-sm text-zinc-500">
+                <p className={`py-6 ${adminMutedTextClassName}`}>
                   No households yet. Add a family to create their link.
                 </p>
               ) : (
@@ -389,15 +390,15 @@ export function HouseholdsSection() {
                     <article key={household.id} className="py-6">
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
-                          <h3 className="text-lg font-medium tracking-tight">
+                          <h3 className={adminItemTitleClassName}>
                             {household.label}
                           </h3>
-                          <p className="mt-1 text-sm text-zinc-500">
+                          <p className={`mt-1 ${adminMutedTextClassName}`}>
                             {rsvpStatusLabel(householdStatus(household.guests))}
                             {" · "}
                             {plusOnesCopy(household.plusOnesAllowed)}
                           </p>
-                          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                          <p className="mt-1 text-sm text-muted">
                             {named
                               .map((guest) =>
                                 formatGuestDisplayName(
@@ -408,7 +409,7 @@ export function HouseholdsSection() {
                               .join(", ") || "No named guests"}
                           </p>
                           {plusOnes.length > 0 ? (
-                            <p className="mt-1 text-sm text-zinc-500">
+                            <p className="mt-1 text-sm text-muted">
                               Plus-ones:{" "}
                               {plusOnes
                                 .map((guest) =>
@@ -421,7 +422,7 @@ export function HouseholdsSection() {
                             </p>
                           ) : null}
                           {household.contactNumber ? (
-                            <p className="mt-1 text-sm text-zinc-500">
+                            <p className="mt-1 text-sm text-muted">
                               {household.contactNumber}
                             </p>
                           ) : null}
@@ -430,21 +431,21 @@ export function HouseholdsSection() {
                           <button
                             type="button"
                             onClick={() => void onCopyLink(household)}
-                            className="underline underline-offset-4"
+                            className={adminLinkClassName}
                           >
                             {copiedId === household.id ? "Copied" : "Copy link"}
                           </button>
                           <button
                             type="button"
                             onClick={() => void onRegenerate(household)}
-                            className="underline underline-offset-4"
+                            className={adminLinkClassName}
                           >
                             Regenerate link
                           </button>
                           <button
                             type="button"
                             onClick={() => startEdit(household)}
-                            className="underline underline-offset-4"
+                            className={adminLinkClassName}
                           >
                             Edit
                           </button>
@@ -456,14 +457,14 @@ export function HouseholdsSection() {
                               setAddGuestName("");
                               setAddGuestPrefix(emptyNamePrefixChoice());
                             }}
-                            className="underline underline-offset-4"
+                            className={adminLinkClassName}
                           >
                             Add guest
                           </button>
                           <button
                             type="button"
                             onClick={() => void onDelete(household)}
-                            className="underline underline-offset-4"
+                            className={adminLinkClassName}
                           >
                             Delete
                           </button>
@@ -482,7 +483,7 @@ export function HouseholdsSection() {
             >
               <form onSubmit={onSubmit} className="space-y-6">
                 <label className="block">
-                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                  <span className={adminLabelClassName}>
                     Household label
                   </span>
                   <input
@@ -495,7 +496,7 @@ export function HouseholdsSection() {
                 </label>
 
                 <label className="block">
-                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                  <span className={adminLabelClassName}>
                     Plus-ones allowed
                   </span>
                   <input
@@ -513,7 +514,7 @@ export function HouseholdsSection() {
 
                 {mode === "create" ? (
                   <fieldset className="space-y-6">
-                    <legend className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                    <legend className={adminLabelClassName}>
                       Named guests
                     </legend>
                     {namedGuests.map((guest, index) => (
@@ -543,7 +544,7 @@ export function HouseholdsSection() {
                           emptyNamedGuestDraft(),
                         ])
                       }
-                      className="text-sm underline underline-offset-4"
+                      className={adminLinkClassName}
                     >
                       Add another named guest
                     </button>
@@ -551,7 +552,7 @@ export function HouseholdsSection() {
                 ) : null}
 
                 {errorMessage ? (
-                  <p className="text-sm text-red-700" role="alert">
+                  <p className={adminErrorClassName} role="alert">
                     {errorMessage}
                   </p>
                 ) : null}
@@ -605,7 +606,7 @@ export function HouseholdsSection() {
                     namePlaceholder="Named guest"
                   />
                   {errorMessage ? (
-                    <p className="text-sm text-red-700" role="alert">
+                    <p className={adminErrorClassName} role="alert">
                       {errorMessage}
                     </p>
                   ) : null}

@@ -1,6 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AdminSectionHeading } from "@/components/admin/AdminSectionHeading";
+import {
+  adminErrorClassName,
+  adminItemTitleClassName,
+  adminLinkClassName,
+  adminListClassName,
+  adminMutedTextClassName,
+  adminSectionClassName,
+  adminSectionInnerClassName,
+} from "@/components/admin/formStyles";
 import { hasSupabaseEnv } from "@/lib/env";
 import { mapWellWishRow } from "@/lib/invite";
 import { createClient } from "@/lib/supabase/client";
@@ -60,39 +70,31 @@ export function MessagesSection() {
   }
 
   return (
-    <section
-      id="messages"
-      className="scroll-mt-24 border-t border-zinc-200 dark:border-zinc-800"
-    >
-      <div className="mx-auto w-full max-w-3xl px-6 py-16">
-        <p className="text-sm tracking-wide text-zinc-500 uppercase">
-          Messages
-        </p>
-        <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-          Well-wishes
-        </h2>
-        <p className="mt-4 max-w-xl text-zinc-600 dark:text-zinc-400">
-          Notes from visitors who opened the site without a personal invitation
-          link. These are not RSVPs.
-        </p>
+    <section id="messages" className={adminSectionClassName}>
+      <div className={adminSectionInnerClassName}>
+        <AdminSectionHeading
+          eyebrow="Messages"
+          title="Well-wishes"
+          description="Notes from visitors who opened the site without a personal invitation link. These are not RSVPs."
+        />
 
         {!configured ? (
-          <p className="mt-8 text-sm text-zinc-600 dark:text-zinc-400">
+          <p className={`mt-8 ${adminMutedTextClassName}`}>
             Connect Supabase to read well-wishes.
           </p>
         ) : (
           <>
             {errorMessage ? (
-              <p className="mt-6 text-sm text-red-700" role="alert">
+              <p className={`mt-6 ${adminErrorClassName}`} role="alert">
                 {errorMessage}
               </p>
             ) : null}
 
-            <div className="mt-10 divide-y divide-zinc-200 border-y border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+            <div className={`mt-10 ${adminListClassName}`}>
               {loading ? (
-                <p className="py-6 text-sm text-zinc-500">Loading notes…</p>
+                <p className={`py-6 ${adminMutedTextClassName}`}>Loading notes…</p>
               ) : messages.length === 0 ? (
-                <p className="py-6 text-sm text-zinc-500">
+                <p className={`py-6 ${adminMutedTextClassName}`}>
                   No well-wishes yet.
                 </p>
               ) : (
@@ -100,22 +102,22 @@ export function MessagesSection() {
                   <article key={message.id} className="py-6">
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
-                        <h3 className="text-lg font-medium tracking-tight">
+                        <h3 className={adminItemTitleClassName}>
                           {message.fullName}
                         </h3>
                         {message.contactNumber ? (
-                          <p className="mt-1 text-sm text-zinc-500">
+                          <p className={`mt-1 ${adminMutedTextClassName}`}>
                             {message.contactNumber}
                           </p>
                         ) : null}
-                        <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
+                        <p className={`mt-3 ${adminMutedTextClassName}`}>
                           {message.message}
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => void onDelete(message)}
-                        className="text-sm underline underline-offset-4"
+                        className={adminLinkClassName}
                       >
                         Delete
                       </button>
