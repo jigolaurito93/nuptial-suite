@@ -21,7 +21,7 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The invitation runs without API keys. RSVP submissions, plus-one allowances, and admin login need Supabase configured (see below).
+Open [http://localhost:3000](http://localhost:3000). The invitation runs without API keys. Household RSVPs, well-wishes, and admin login need Supabase configured (see below).
 
 ## Environment variables
 
@@ -37,12 +37,12 @@ Copy `.env.example` to `.env.local` and fill in values when you are ready to con
 ### Supabase setup
 
 1. Create a Supabase project.
-2. In the SQL editor, run [`supabase/migrations/001_rsvps.sql`](supabase/migrations/001_rsvps.sql), then [`supabase/migrations/002_invites.sql`](supabase/migrations/002_invites.sql).
-3. Copy the project URL and anon `public` key into `.env.local`.
+2. In the SQL editor, run [`supabase/migrations/001_rsvps.sql`](supabase/migrations/001_rsvps.sql), then [`supabase/migrations/002_invites.sql`](supabase/migrations/002_invites.sql), then [`supabase/migrations/003_households_guests.sql`](supabase/migrations/003_households_guests.sql).
+3. Copy the project URL and anon `public` key into `.env.local`. Do not use a service-role key.
 4. Authentication → enable Email. Add one user for the couple (email + password).
 5. Restart `pnpm dev`.
 
-Anonymous guests can submit an RSVP and look up a single invite by code. They cannot list the guest table. The couple signs in at `/login` to manage invitations and plus-ones.
+Guests RSVP only through a personal `/?invite=CODE` link. Visitors without a valid code can leave a well-wishes note instead. They cannot list households, guests, or messages. The couple signs in at `/login` to manage invitation cards and the guest list.
 
 ## Guest invitation (`/`)
 
@@ -62,13 +62,14 @@ Single-page experience with an envelope gate:
 | Dress code       | `#dress-code`    |
 | Gallery          | `#gallery`       |
 | Gift guide       | `#gift-guide`    |
-| RSVP             | `#rsvp`          |
+| RSVP (invite link only) | `#rsvp`   |
+| Well-wishes (no invite) | `#wishes` |
 | FAQs             | `#faqs`          |
 | See you there    | `#see-you-there` |
 
 Static copy lives in [`src/content/invitation.ts`](src/content/invitation.ts) (Kennett Ramos & Bea Alibutud).
 
-Personal invite links use `/?invite=CODE`. When the code matches an invitation, RSVP and the plus-one FAQ show that household’s allowance. Without a code, the form stays anonymous (no plus-ones).
+Personal invite links use `/?invite=CODE`. A valid code shows a per-person RSVP for that household. Without a code (or with an invalid one), RSVP is hidden and a well-wishes form is shown instead. Public RSVP closes on 8 January 2028; the invitation itself stays available.
 
 ### Audio
 
@@ -80,14 +81,15 @@ Hero and gallery use Unsplash placeholders for now. Swap URLs in the content mod
 
 ## Couple admin
 
-- `/admin` — wedding planner (protected when Supabase env is set). Guests section creates invitations, sets plus-ones, and copies unique links.
+- `/admin` — wedding planner (protected when Supabase env is set). Households creates invitation cards and copies unique links. Guests is the flat headcount. Messages lists well-wishes.
 - `/login` — couple email/password sign-in
 - `/auth/callback`
 
 ## API
 
-- `GET /api/invite?code=` — public payload for one invitation
-- `POST /api/rsvp` — anonymous insert into `public.rsvps`, or invite RSVP via `submit_invite_rsvp`
+- `GET /api/invite?code=` — public household, named guests, plus-ones, and whether RSVP is still open
+- `POST /api/rsvp` — invite-only per-guest RSVP via `submit_invite_rsvp`
+- `POST /api/messages` — well-wishes note (name + message; phone optional)
 - `POST /api/emails` — stub (Resend later)
 
 ## Scripts

@@ -2,15 +2,7 @@ import { NextResponse } from "next/server";
 import { hasSupabaseEnv } from "@/lib/env";
 import { mapPublicInvite, normalizeInviteCode } from "@/lib/invite";
 import { createClient } from "@/lib/supabase/server";
-import type { InviteRsvpStatus } from "@/types";
-
-type LookupInviteRow = {
-  display_name: string;
-  plus_ones_allowed: number;
-  rsvp_status: InviteRsvpStatus;
-  plus_one_names: string[] | null;
-  contact_number: string | null;
-};
+import type { LookupInviteRow } from "@/types";
 
 export async function GET(request: Request) {
   if (!hasSupabaseEnv()) {

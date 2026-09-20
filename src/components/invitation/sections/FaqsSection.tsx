@@ -19,7 +19,7 @@ export function FaqsSection({ invite }: FaqsSectionProps) {
 
     return {
       ...faq,
-      answer: plusOneAllowanceCopy(invite.plusOnesAllowed, invite.displayName),
+      answer: plusOneAllowanceCopy(invite.plusOnesAllowed, invite.label),
     };
   });
 

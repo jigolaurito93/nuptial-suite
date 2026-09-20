@@ -4,16 +4,14 @@ import { RsvpForm } from "@/components/invitation/RsvpForm";
 import type { PublicInvite } from "@/types";
 
 type RsvpSectionProps = {
-  invite?: PublicInvite | null;
-  inviteCode?: string | null;
-  loading?: boolean;
+  invite: PublicInvite;
+  inviteCode: string;
   onSuccess?: () => void;
 };
 
 export function RsvpSection({
   invite,
   inviteCode,
-  loading = false,
   onSuccess,
 }: RsvpSectionProps) {
   return (
@@ -27,18 +25,12 @@ export function RsvpSection({
         description={`Let us know if you will join us. Please respond by ${invitation.rsvpByLabel}.`}
       />
       <div className="mt-14">
-        {loading ? (
-          <p className="mx-auto max-w-lg text-center text-sm text-muted">
-            Loading your invitation…
-          </p>
-        ) : (
-          <RsvpForm
-            key={inviteCode ?? "anonymous"}
-            invite={invite}
-            inviteCode={inviteCode}
-            onSuccess={onSuccess}
-          />
-        )}
+        <RsvpForm
+          key={inviteCode}
+          invite={invite}
+          inviteCode={inviteCode}
+          onSuccess={onSuccess}
+        />
       </div>
     </section>
   );

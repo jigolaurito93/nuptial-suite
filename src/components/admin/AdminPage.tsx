@@ -1,5 +1,7 @@
 import { AdminNav } from "@/components/admin/AdminNav";
-import { GuestInvitesSection } from "@/components/admin/GuestInvitesSection";
+import { GuestsSection } from "@/components/admin/GuestsSection";
+import { HouseholdsSection } from "@/components/admin/HouseholdsSection";
+import { MessagesSection } from "@/components/admin/MessagesSection";
 import { PlaceholderSection } from "@/components/ui";
 
 export function AdminPage() {
@@ -13,7 +15,9 @@ export function AdminPage() {
           title="Wedding planner"
           description="Private workspace for the bride and groom. Upcoming tasks, RSVP counts, and budget snapshot will live here."
         />
-        <GuestInvitesSection />
+        <HouseholdsSection />
+        <GuestsSection />
+        <MessagesSection />
         <PlaceholderSection
           id="budget"
           title="Budget"

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { invitation } from "@/content/invitation";
 
-const links = [
+const baseLinks = [
   { href: "#save-the-date", label: "Home" },
   { href: "#countdown", label: "Countdown" },
   { href: "#venue", label: "Venue" },
@@ -13,15 +13,26 @@ const links = [
   { href: "#dress-code", label: "Dress" },
   { href: "#gallery", label: "Gallery" },
   { href: "#gift-guide", label: "Gifts" },
-  { href: "#rsvp", label: "RSVP" },
-  { href: "#faqs", label: "FAQs" },
 ] as const;
 
 type InvitationNavProps = {
   visible: boolean;
+  replyHref?: "#rsvp" | "#wishes" | null;
 };
 
-export function InvitationNav({ visible }: InvitationNavProps) {
+export function InvitationNav({
+  visible,
+  replyHref = null,
+}: InvitationNavProps) {
+  const links = [
+    ...baseLinks,
+    ...(replyHref === "#rsvp"
+      ? [{ href: "#rsvp" as const, label: "RSVP" }]
+      : replyHref === "#wishes"
+        ? [{ href: "#wishes" as const, label: "Wishes" }]
+        : []),
+    { href: "#faqs" as const, label: "FAQs" },
+  ];
   const [hidden, setHidden] = useState(false);
   const lastY = useRef(0);
 

@@ -284,7 +284,7 @@ export const invitation = {
     {
       question: "How do I RSVP?",
       answer:
-        "Use the RSVP section on this page. Kindly respond by 8 January 2028 so we can finalize seating.",
+        "Use the personal invitation link we sent you. Kindly respond by 8 January 2028 so we can finalize seating.",
     },
   ],
   seeYouThere: {

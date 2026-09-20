@@ -19,6 +19,7 @@ import {
   SeeYouThereSection,
 } from "@/components/invitation/sections/SeeYouThereSection";
 import { VenueSection } from "@/components/invitation/sections/VenueSection";
+import { WellWishesSection } from "@/components/invitation/sections/WellWishesSection";
 import { usePublicInvite } from "@/components/invitation/usePublicInvite";
 
 type InvitationPageProps = {
@@ -48,6 +49,8 @@ export function InvitationPage({ inviteCode = null }: InvitationPageProps) {
     }
   }, [opened, muted]);
 
+  const replyHref = loading ? null : invite ? "#rsvp" : "#wishes";
+
   return (
     <div className="relative flex min-h-dvh flex-col text-foreground">
       <div className="liquid-atmosphere" aria-hidden>
@@ -63,7 +66,7 @@ export function InvitationPage({ inviteCode = null }: InvitationPageProps) {
       <EnvelopeHero onOpenedChange={onOpenedChange} />
 
       <div className="relative z-10 flex flex-1 flex-col">
-        <InvitationNav visible={opened} />
+        <InvitationNav visible={opened} replyHref={replyHref} />
         <main className="flex-1">
           <SaveTheDateSection />
           <CountdownSection />
@@ -73,12 +76,21 @@ export function InvitationPage({ inviteCode = null }: InvitationPageProps) {
           <DressCodeSection />
           <GallerySection />
           <GiftGuideSection />
-          <RsvpSection
-            invite={invite}
-            inviteCode={invite ? inviteCode : null}
-            loading={loading}
-            onSuccess={refresh}
-          />
+          {loading ? (
+            <section className="invitation-section border-t border-border px-6 py-24">
+              <p className="mx-auto max-w-lg text-center text-sm text-muted">
+                Loading your invitation…
+              </p>
+            </section>
+          ) : invite && inviteCode ? (
+            <RsvpSection
+              invite={invite}
+              inviteCode={inviteCode}
+              onSuccess={refresh}
+            />
+          ) : (
+            <WellWishesSection />
+          )}
           <FaqsSection invite={invite} />
           <SeeYouThereSection />
         </main>

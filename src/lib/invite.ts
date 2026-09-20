@@ -1,4 +1,16 @@
-import type { Invite, InviteRow, PublicInvite } from "@/types";
+import type {
+  Guest,
+  GuestRow,
+  Household,
+  HouseholdRow,
+  HouseholdRsvpStatus,
+  InviteRsvpStatus,
+  LookupInviteRow,
+  PublicGuest,
+  PublicInvite,
+  WellWish,
+  WellWishRow,
+} from "@/types";
 
 export const INVITE_COOKIE_NAME = "ns_invite_code";
 export const INVITE_COOKIE_MAX_AGE = 60 * 60 * 24 * 90;
@@ -38,42 +50,113 @@ export function clearInviteCookie() {
   document.cookie = `${INVITE_COOKIE_NAME}=;path=/;max-age=0;samesite=lax`;
 }
 
-export function mapInviteRow(row: InviteRow): Invite {
+const RSVP_STATUSES: InviteRsvpStatus[] = [
+  "pending",
+  "attending",
+  "declining",
+];
+
+function isInviteRsvpStatus(value: unknown): value is InviteRsvpStatus {
+  return (
+    typeof value === "string" &&
+    RSVP_STATUSES.includes(value as InviteRsvpStatus)
+  );
+}
+
+function mapPublicGuest(row: {
+  id: unknown;
+  full_name: unknown;
+  is_plus_one: unknown;
+  rsvp_status: unknown;
+}): PublicGuest | null {
+  if (typeof row.id !== "string" || typeof row.full_name !== "string") {
+    return null;
+  }
+  if (!isInviteRsvpStatus(row.rsvp_status)) return null;
+
+  return {
+    id: row.id,
+    fullName: row.full_name,
+    isPlusOne: Boolean(row.is_plus_one),
+    rsvpStatus: row.rsvp_status,
+  };
+}
+
+function parseLookupGuests(value: unknown): PublicGuest[] {
+  const rows = Array.isArray(value) ? value : [];
+  return rows.flatMap((row) => {
+    if (!row || typeof row !== "object") return [];
+    const guest = mapPublicGuest(row as {
+      id: unknown;
+      full_name: unknown;
+      is_plus_one: unknown;
+      rsvp_status: unknown;
+    });
+    return guest ? [guest] : [];
+  });
+}
+
+export function mapPublicInvite(row: LookupInviteRow): PublicInvite {
+  return {
+    label: row.label,
+    plusOnesAllowed: row.plus_ones_allowed,
+    contactNumber: row.contact_number,
+    message: row.message,
+    rsvpOpen: Boolean(row.rsvp_open),
+    guests: parseLookupGuests(row.guests),
+  };
+}
+
+export function mapHouseholdRow(row: HouseholdRow): Household {
   return {
     id: row.id,
     inviteCode: row.invite_code,
-    displayName: row.display_name,
+    label: row.label,
     plusOnesAllowed: row.plus_ones_allowed,
-    rsvpStatus: row.rsvp_status,
     contactNumber: row.contact_number,
     message: row.message,
-    plusOneNames: row.plus_one_names ?? [],
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
 }
 
-export function mapPublicInvite(row: {
-  display_name: string;
-  plus_ones_allowed: number;
-  rsvp_status: PublicInvite["rsvpStatus"];
-  plus_one_names: string[] | null;
-  contact_number: string | null;
-}): PublicInvite {
+export function mapGuestRow(row: GuestRow): Guest {
   return {
-    displayName: row.display_name,
-    plusOnesAllowed: row.plus_ones_allowed,
+    id: row.id,
+    householdId: row.household_id,
+    fullName: row.full_name,
+    isPlusOne: row.is_plus_one,
     rsvpStatus: row.rsvp_status,
-    plusOneNames: row.plus_one_names ?? [],
-    contactNumber: row.contact_number,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 
-export function plusOneAllowanceCopy(
-  allowed: number,
-  displayName?: string,
-): string {
-  const name = displayName?.trim();
+export function mapWellWishRow(row: WellWishRow): WellWish {
+  return {
+    id: row.id,
+    fullName: row.full_name,
+    message: row.message,
+    contactNumber: row.contact_number,
+    createdAt: row.created_at,
+  };
+}
+
+export function householdStatus(
+  guests: { rsvpStatus: InviteRsvpStatus }[],
+): HouseholdRsvpStatus {
+  if (guests.length === 0) return "pending";
+
+  const statuses = new Set(guests.map((guest) => guest.rsvpStatus));
+  if (statuses.size === 1) {
+    return guests[0].rsvpStatus;
+  }
+
+  return "mixed";
+}
+
+export function plusOneAllowanceCopy(allowed: number, label?: string): string {
+  const name = label?.trim();
   if (allowed <= 0) {
     return name
       ? `This invitation is reserved for ${name} only. Additional guests cannot be accommodated.`
@@ -91,4 +174,32 @@ export function plusOneAllowanceCopy(
 
 export function inviteLink(origin: string, code: string) {
   return `${origin}/?invite=${code}`;
+}
+
+export function rsvpStatusLabel(
+  status: InviteRsvpStatus | HouseholdRsvpStatus,
+) {
+  if (status === "attending") return "Attending";
+  if (status === "declining") return "Declining";
+  if (status === "mixed") return "Mixed";
+  return "Pending";
+}
+
+export async function withUniqueInviteCode(
+  run: (
+    code: string,
+  ) => Promise<{ error: { message: string; code?: string } | null }>,
+) {
+  let lastError: { message: string; code?: string } | null = null;
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const { error } = await run(generateInviteCode());
+    if (!error) return;
+    lastError = error;
+    if (error.code !== "23505") break;
+  }
+
+  throw new Error(
+    lastError?.message ?? "Unable to create a unique invite code.",
+  );
 }

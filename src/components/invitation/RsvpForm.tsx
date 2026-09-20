@@ -1,50 +1,73 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { plusOneAllowanceCopy } from "@/lib/invite";
 import type { PublicInvite, RsvpPayload, RsvpStatus } from "@/types";
 
 type FormState = "idle" | "submitting" | "success" | "error";
 
 type RsvpFormProps = {
-  invite?: PublicInvite | null;
-  inviteCode?: string | null;
+  invite: PublicInvite;
+  inviteCode: string;
   onSuccess?: () => void;
 };
 
-function emptyPlusOneNames(invite: PublicInvite | null | undefined) {
-  const allowed = invite?.plusOnesAllowed ?? 0;
-  const existing = invite?.plusOneNames ?? [];
-  return Array.from({ length: allowed }, (_, index) => existing[index] ?? "");
+function namedGuests(invite: PublicInvite) {
+  return invite.guests.filter((guest) => !guest.isPlusOne);
 }
 
-function statusFromInvite(
-  invite: PublicInvite | null | undefined,
-): RsvpStatus | "" {
-  return invite?.rsvpStatus === "pending" ? "" : (invite?.rsvpStatus ?? "");
+function plusOneGuests(invite: PublicInvite) {
+  return invite.guests.filter((guest) => guest.isPlusOne);
+}
+
+function statusesFromInvite(invite: PublicInvite) {
+  return Object.fromEntries(
+    namedGuests(invite).map((guest) => [
+      guest.id,
+      guest.rsvpStatus === "pending" ? "" : guest.rsvpStatus,
+    ]),
+  ) as Record<string, RsvpStatus | "">;
+}
+
+function plusOneNamesFromInvite(invite: PublicInvite) {
+  const existing = plusOneGuests(invite).map((guest) => guest.fullName);
+  return Array.from(
+    { length: invite.plusOnesAllowed },
+    (_, index) => existing[index] ?? "",
+  );
+}
+
+function statusLabel(status: RsvpStatus | "pending" | "") {
+  if (status === "attending") return "Attending";
+  if (status === "declining") return "Declining";
+  return "Pending";
 }
 
 export function RsvpForm({ invite, inviteCode, onSuccess }: RsvpFormProps) {
-  const [status, setStatus] = useState<RsvpStatus | "">(() =>
-    statusFromInvite(invite),
+  const named = useMemo(() => namedGuests(invite), [invite]);
+  const [guestStatuses, setGuestStatuses] = useState(() =>
+    statusesFromInvite(invite),
   );
-  const [fullName, setFullName] = useState(invite?.displayName ?? "");
   const [contactNumber, setContactNumber] = useState(
-    invite?.contactNumber ?? "",
+    invite.contactNumber ?? "",
   );
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(invite.message ?? "");
   const [plusOneNames, setPlusOneNames] = useState(() =>
-    emptyPlusOneNames(invite),
+    plusOneNamesFromInvite(invite),
   );
   const [formState, setFormState] = useState<FormState>("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
+  const anyAttending = named.some(
+    (guest) => guestStatuses[guest.id] === "attending",
+  );
+  const showPlusOnes = invite.plusOnesAllowed > 0 && anyAttending;
+
   function resetForm() {
-    setStatus(statusFromInvite(invite));
-    setFullName(invite?.displayName ?? "");
-    setContactNumber(invite?.contactNumber ?? "");
-    setPlusOneNames(emptyPlusOneNames(invite));
-    setMessage("");
+    setGuestStatuses(statusesFromInvite(invite));
+    setContactNumber(invite.contactNumber ?? "");
+    setPlusOneNames(plusOneNamesFromInvite(invite));
+    setMessage(invite.message ?? "");
     setErrorMessage("");
     setFormState("idle");
   }
@@ -52,30 +75,32 @@ export function RsvpForm({ invite, inviteCode, onSuccess }: RsvpFormProps) {
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!status) {
+    const missing = named.some((guest) => !guestStatuses[guest.id]);
+    if (missing) {
       setFormState("error");
-      setErrorMessage("Please choose attending or declining.");
+      setErrorMessage(
+        "Please choose attending or declining for each person on this invitation.",
+      );
       return;
     }
+
+    const usedPlusOnes = showPlusOnes
+      ? plusOneNames.map((name) => name.trim()).filter(Boolean)
+      : [];
 
     setFormState("submitting");
     setErrorMessage("");
 
     const payload: RsvpPayload = {
+      inviteCode,
       contactNumber: contactNumber.trim(),
-      status,
       message: message.trim() || undefined,
+      guestReplies: named.map((guest) => ({
+        id: guest.id,
+        status: guestStatuses[guest.id] as RsvpStatus,
+      })),
+      plusOneNames: usedPlusOnes,
     };
-
-    if (inviteCode) {
-      payload.inviteCode = inviteCode;
-      payload.plusOneNames =
-        status === "attending"
-          ? plusOneNames.map((name) => name.trim()).filter(Boolean)
-          : [];
-    } else {
-      payload.fullName = fullName.trim();
-    }
 
     try {
       const response = await fetch("/api/rsvp", {
@@ -92,15 +117,6 @@ export function RsvpForm({ invite, inviteCode, onSuccess }: RsvpFormProps) {
       }
 
       setFormState("success");
-      if (!inviteCode) {
-        setFullName("");
-        setContactNumber("");
-        setMessage("");
-        setStatus("");
-        setPlusOneNames([]);
-      } else {
-        setMessage("");
-      }
       onSuccess?.();
     } catch (error) {
       setFormState("error");
@@ -115,78 +131,98 @@ export function RsvpForm({ invite, inviteCode, onSuccess }: RsvpFormProps) {
       <div className="mx-auto max-w-lg border border-border bg-surface px-8 py-12 text-center">
         <p className="font-display text-3xl">Thank you</p>
         <p className="mt-3 text-muted">
-          Your RSVP has been received. We look forward to celebrating with you.
+          Your RSVP has been received. You can use this same link to update it
+          until the deadline.
         </p>
         <button
           type="button"
           className="mt-8 text-sm underline underline-offset-4"
           onClick={resetForm}
         >
-          Submit another response
+          Update your response
         </button>
       </div>
     );
   }
 
-  const showPlusOnes =
-    Boolean(invite) &&
-    (invite?.plusOnesAllowed ?? 0) > 0 &&
-    status === "attending";
+  if (!invite.rsvpOpen) {
+    return (
+      <div className="mx-auto max-w-lg space-y-6 border border-border bg-surface px-8 py-10">
+        <p className="text-center text-sm leading-relaxed text-muted">
+          RSVP is closed. Here is what we have on file for {invite.label}.
+        </p>
+        <ul className="space-y-3 text-sm">
+          {invite.guests.map((guest) => (
+            <li
+              key={guest.id}
+              className="flex items-center justify-between gap-4 border-b border-border pb-3"
+            >
+              <span>
+                {guest.fullName}
+                {guest.isPlusOne ? (
+                  <span className="text-muted"> (plus-one)</span>
+                ) : null}
+              </span>
+              <span className="text-muted">{statusLabel(guest.rsvpStatus)}</span>
+            </li>
+          ))}
+        </ul>
+        {invite.contactNumber ? (
+          <p className="text-sm text-muted">Contact: {invite.contactNumber}</p>
+        ) : null}
+        {invite.message ? (
+          <p className="text-sm text-muted">{invite.message}</p>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-lg space-y-8">
-      {invite ? (
-        <p className="text-center text-sm leading-relaxed text-muted">
-          {plusOneAllowanceCopy(invite.plusOnesAllowed, invite.displayName)}
-        </p>
-      ) : null}
+      <p className="text-center text-sm leading-relaxed text-muted">
+        {plusOneAllowanceCopy(invite.plusOnesAllowed, invite.label)}
+      </p>
+      <p className="text-center text-sm text-muted">
+        Invitation for{" "}
+        <span className="text-foreground">{invite.label}</span>
+      </p>
 
-      <fieldset>
+      <fieldset className="space-y-6">
         <legend className="text-xs tracking-[0.22em] text-accent uppercase">
-          Will you attend?
+          Who will attend?
         </legend>
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          {(
-            [
-              { value: "attending", label: "Attending" },
-              { value: "declining", label: "Declining" },
-            ] as const
-          ).map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => setStatus(option.value)}
-              className={`border px-4 py-3 text-sm tracking-wide transition ${
-                status === option.value
-                  ? "border-accent bg-accent-soft text-foreground"
-                  : "border-border bg-surface text-muted hover:border-accent"
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
+        {named.map((guest) => (
+          <div key={guest.id}>
+            <p className="text-sm text-foreground">{guest.fullName}</p>
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              {(
+                [
+                  { value: "attending", label: "Attending" },
+                  { value: "declining", label: "Declining" },
+                ] as const
+              ).map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() =>
+                    setGuestStatuses((current) => ({
+                      ...current,
+                      [guest.id]: option.value,
+                    }))
+                  }
+                  className={`border px-4 py-3 text-sm tracking-wide transition ${
+                    guestStatuses[guest.id] === option.value
+                      ? "border-accent bg-accent-soft text-foreground"
+                      : "border-border bg-surface text-muted hover:border-accent"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
       </fieldset>
-
-      {invite ? (
-        <p className="text-sm text-muted">
-          Invitation for{" "}
-          <span className="text-foreground">{invite.displayName}</span>
-        </p>
-      ) : (
-        <label className="block">
-          <span className="text-xs tracking-[0.18em] text-muted uppercase">
-            Full name
-          </span>
-          <input
-            required
-            value={fullName}
-            onChange={(event) => setFullName(event.target.value)}
-            className="mt-2 w-full border border-border bg-surface px-4 py-3 text-foreground outline-none focus:border-accent"
-            autoComplete="name"
-          />
-        </label>
-      )}
 
       <label className="block">
         <span className="text-xs tracking-[0.18em] text-muted uppercase">
@@ -205,9 +241,9 @@ export function RsvpForm({ invite, inviteCode, onSuccess }: RsvpFormProps) {
       {showPlusOnes ? (
         <fieldset className="space-y-4">
           <legend className="text-xs tracking-[0.18em] text-muted uppercase">
-            {invite?.plusOnesAllowed === 1
-              ? "Plus-one name (optional)"
-              : `Guest names (up to ${invite?.plusOnesAllowed})`}
+            {invite.plusOnesAllowed === 1
+              ? "Plus-one name (leave blank if not bringing anyone)"
+              : `Guest names (up to ${invite.plusOnesAllowed}; leave blank if unused)`}
           </legend>
           {plusOneNames.map((name, index) => (
             <label key={index} className="block">

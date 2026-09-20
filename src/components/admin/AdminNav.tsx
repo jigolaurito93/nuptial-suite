@@ -3,7 +3,9 @@ import { SignOutButton } from "@/components/admin/SignOutButton";
 
 const links = [
   { href: "#overview", label: "Overview" },
+  { href: "#households", label: "Households" },
   { href: "#guests", label: "Guests" },
+  { href: "#messages", label: "Messages" },
   { href: "#budget", label: "Budget" },
   { href: "#vendors", label: "Vendors" },
   { href: "#tasks", label: "Tasks" },
