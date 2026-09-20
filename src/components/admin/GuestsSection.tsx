@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { GuestNameFields } from "@/components/admin/GuestNameFields";
 import {
   adminInputClassName,
@@ -31,6 +31,15 @@ import type {
 } from "@/types";
 
 type FormMode = "create" | "edit";
+type RsvpFilter = "all" | InviteRsvpStatus;
+type KindFilter = "all" | "named" | "plus-one";
+
+function guestCountLabel(visible: number, total: number, filtered: boolean) {
+  if (!filtered) {
+    return `${visible} ${visible === 1 ? "guest" : "guests"}`;
+  }
+  return `${visible} of ${total} ${total === 1 ? "guest" : "guests"}`;
+}
 
 export function GuestsSection() {
   const configured = hasSupabaseEnv();
@@ -49,6 +58,9 @@ export function GuestsSection() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [reloadToken, setReloadToken] = useState(0);
+  const [familyFilter, setFamilyFilter] = useState("");
+  const [rsvpFilter, setRsvpFilter] = useState<RsvpFilter>("all");
+  const [kindFilter, setKindFilter] = useState<KindFilter>("all");
 
   useEffect(() => {
     if (!configured) return;
@@ -101,6 +113,33 @@ export function GuestsSection() {
     };
   }, [configured, reloadToken]);
 
+  const familyNames = useMemo(() => {
+    return [...new Set(guests.map((guest) => guest.householdLabel))].sort(
+      (left, right) => left.localeCompare(right),
+    );
+  }, [guests]);
+
+  const filtersActive =
+    familyFilter.trim() !== "" || rsvpFilter !== "all" || kindFilter !== "all";
+
+  const filteredGuests = useMemo(() => {
+    const familyQuery = familyFilter.trim().toLowerCase();
+    return guests.filter((guest) => {
+      if (
+        familyQuery &&
+        !guest.householdLabel.toLowerCase().includes(familyQuery)
+      ) {
+        return false;
+      }
+      if (rsvpFilter !== "all" && guest.rsvpStatus !== rsvpFilter) {
+        return false;
+      }
+      if (kindFilter === "named" && guest.isPlusOne) return false;
+      if (kindFilter === "plus-one" && !guest.isPlusOne) return false;
+      return true;
+    });
+  }, [familyFilter, guests, kindFilter, rsvpFilter]);
+
   function resetForm() {
     setFullName("");
     setNamePrefix(emptyNamePrefixChoice());
@@ -113,6 +152,12 @@ export function GuestsSection() {
 
   function reload() {
     setReloadToken((value) => value + 1);
+  }
+
+  function clearFilters() {
+    setFamilyFilter("");
+    setRsvpFilter("all");
+    setKindFilter("all");
   }
 
   function startEdit(guest: GuestWithHousehold) {
@@ -347,52 +392,132 @@ export function GuestsSection() {
               </p>
             ) : null}
 
-            <div className="mt-12 divide-y divide-zinc-200 border-y border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
-              {loading ? (
-                <p className="py-6 text-sm text-zinc-500">Loading guests…</p>
-              ) : guests.length === 0 ? (
-                <p className="py-6 text-sm text-zinc-500">
-                  No guests yet. Add a person above or create a household.
+            <div className="mt-12">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <label className="block">
+                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                    Family name
+                  </span>
+                  <input
+                    list="headcount-family-names"
+                    value={familyFilter}
+                    onChange={(event) => setFamilyFilter(event.target.value)}
+                    placeholder="All families"
+                    className={adminInputClassName}
+                  />
+                  <datalist id="headcount-family-names">
+                    {familyNames.map((label) => (
+                      <option key={label} value={label} />
+                    ))}
+                  </datalist>
+                </label>
+                <label className="block">
+                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                    RSVP
+                  </span>
+                  <select
+                    value={rsvpFilter}
+                    onChange={(event) =>
+                      setRsvpFilter(event.target.value as RsvpFilter)
+                    }
+                    className={adminInputClassName}
+                  >
+                    <option value="all">All statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="attending">Attending</option>
+                    <option value="declining">Declining</option>
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                    Guest type
+                  </span>
+                  <select
+                    value={kindFilter}
+                    onChange={(event) =>
+                      setKindFilter(event.target.value as KindFilter)
+                    }
+                    className={adminInputClassName}
+                  >
+                    <option value="all">All guests</option>
+                    <option value="named">Named guest</option>
+                    <option value="plus-one">Plus-one</option>
+                  </select>
+                </label>
+              </div>
+
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-zinc-500">
+                  {loading
+                    ? "Counting guests…"
+                    : guestCountLabel(
+                        filteredGuests.length,
+                        guests.length,
+                        filtersActive,
+                      )}
                 </p>
-              ) : (
-                guests.map((guest) => (
-                  <article key={guest.id} className="py-6">
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div>
-                        <h3 className="text-lg font-medium tracking-tight">
-                          {formatGuestDisplayName(
-                            guest.fullName,
-                            guest.namePrefix,
-                          )}
-                        </h3>
-                        <p className="mt-1 text-sm text-zinc-500">
-                          {guest.householdLabel}
-                          {" · "}
-                          {guest.isPlusOne ? "Plus-one" : "Named guest"}
-                          {" · "}
-                          {rsvpStatusLabel(guest.rsvpStatus)}
-                        </p>
+                {filtersActive ? (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="text-sm underline underline-offset-4"
+                  >
+                    Clear filters
+                  </button>
+                ) : null}
+              </div>
+
+              <div className="mt-4 divide-y divide-zinc-200 border-y border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+                {loading ? (
+                  <p className="py-6 text-sm text-zinc-500">Loading guests…</p>
+                ) : guests.length === 0 ? (
+                  <p className="py-6 text-sm text-zinc-500">
+                    No guests yet. Add a person above or create a household.
+                  </p>
+                ) : filteredGuests.length === 0 ? (
+                  <p className="py-6 text-sm text-zinc-500">
+                    No guests match these filters.
+                  </p>
+                ) : (
+                  filteredGuests.map((guest) => (
+                    <article key={guest.id} className="py-6">
+                      <div className="flex flex-wrap items-start justify-between gap-4">
+                        <div>
+                          <h3 className="text-lg font-medium tracking-tight">
+                            {formatGuestDisplayName(
+                              guest.fullName,
+                              guest.namePrefix,
+                            )}
+                          </h3>
+                          <p className="mt-1 text-sm text-zinc-500">
+                            {guest.householdLabel}
+                            {" · "}
+                            {guest.isPlusOne ? "Plus-one" : "Named guest"}
+                            {" · "}
+                            {rsvpStatusLabel(guest.rsvpStatus)}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-3 text-sm">
+                          <button
+                            type="button"
+                            onClick={() => startEdit(guest)}
+                            className="underline underline-offset-4"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void onDelete(guest)}
+                            className="underline underline-offset-4"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-3 text-sm">
-                        <button
-                          type="button"
-                          onClick={() => startEdit(guest)}
-                          className="underline underline-offset-4"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void onDelete(guest)}
-                          className="underline underline-offset-4"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </article>
-                ))
-              )}
+                    </article>
+                  ))
+                )}
+              </div>
             </div>
           </>
         )}
