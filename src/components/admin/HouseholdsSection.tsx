@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import { AdminModal } from "@/components/admin/AdminModal";
 import { GuestNameFields } from "@/components/admin/GuestNameFields";
 import {
   adminInputClassName,
@@ -55,6 +56,7 @@ export function HouseholdsSection() {
     emptyNamedGuestDraft(),
   ]);
   const [mode, setMode] = useState<FormMode>("create");
+  const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [addGuestHouseholdId, setAddGuestHouseholdId] = useState<string | null>(
     null,
@@ -108,18 +110,40 @@ export function HouseholdsSection() {
     setNamedGuests([emptyNamedGuestDraft()]);
     setMode("create");
     setEditingId(null);
+    setFormOpen(false);
   }
 
   function reload() {
     setReloadToken((value) => value + 1);
   }
 
+  function openCreate() {
+    setErrorMessage("");
+    setLabel("");
+    setPlusOnesAllowed(0);
+    setNamedGuests([emptyNamedGuestDraft()]);
+    setMode("create");
+    setEditingId(null);
+    setFormOpen(true);
+  }
+
   function startEdit(household: HouseholdWithGuests) {
+    setErrorMessage("");
     setMode("edit");
     setEditingId(household.id);
     setLabel(household.label);
     setPlusOnesAllowed(household.plusOnesAllowed);
+    setFormOpen(true);
   }
+
+  function closeAddGuest() {
+    setAddGuestHouseholdId(null);
+    setAddGuestName("");
+    setAddGuestPrefix(emptyNamePrefixChoice());
+  }
+
+  const addGuestHousehold =
+    households.find((row) => row.id === addGuestHouseholdId) ?? null;
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -328,101 +352,17 @@ export function HouseholdsSection() {
           </p>
         ) : (
           <>
-            <form onSubmit={onSubmit} className="mt-10 space-y-6">
-              <label className="block">
-                <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
-                  Household label
-                </span>
-                <input
-                  required
-                  value={label}
-                  onChange={(event) => setLabel(event.target.value)}
-                  placeholder="The Santos Family"
-                  className={adminInputClassName}
-                />
-              </label>
+            <div className="mt-10">
+              <button
+                type="button"
+                onClick={openCreate}
+                className={adminPrimaryButtonClassName}
+              >
+                Add household
+              </button>
+            </div>
 
-              <label className="block">
-                <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
-                  Plus-ones allowed
-                </span>
-                <input
-                  required
-                  type="number"
-                  min={0}
-                  max={10}
-                  value={plusOnesAllowed}
-                  onChange={(event) =>
-                    setPlusOnesAllowed(Number(event.target.value))
-                  }
-                  className={adminInputClassName}
-                />
-              </label>
-
-              {mode === "create" ? (
-                <fieldset className="space-y-6">
-                  <legend className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
-                    Named guests
-                  </legend>
-                  {namedGuests.map((guest, index) => (
-                    <GuestNameFields
-                      key={index}
-                      prefix={guest.prefix}
-                      onPrefixChange={(prefix) => {
-                        const next = [...namedGuests];
-                        next[index] = { ...next[index], prefix };
-                        setNamedGuests(next);
-                      }}
-                      fullName={guest.name}
-                      onFullNameChange={(name) => {
-                        const next = [...namedGuests];
-                        next[index] = { ...next[index], name };
-                        setNamedGuests(next);
-                      }}
-                      nameRequired={index === 0}
-                      namePlaceholder="Full name"
-                    />
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setNamedGuests((current) => [
-                        ...current,
-                        emptyNamedGuestDraft(),
-                      ])
-                    }
-                    className="text-sm underline underline-offset-4"
-                  >
-                    Add another named guest
-                  </button>
-                </fieldset>
-              ) : null}
-
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className={adminPrimaryButtonClassName}
-                >
-                  {saving
-                    ? "Saving…"
-                    : mode === "edit"
-                      ? "Save household"
-                      : "Add household"}
-                </button>
-                {mode === "edit" ? (
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className={adminSecondaryButtonClassName}
-                  >
-                    Cancel
-                  </button>
-                ) : null}
-              </div>
-            </form>
-
-            {errorMessage ? (
+            {errorMessage && !formOpen && !addGuestHousehold ? (
               <p className="mt-6 text-sm text-red-700" role="alert">
                 {errorMessage}
               </p>
@@ -435,7 +375,7 @@ export function HouseholdsSection() {
                 </p>
               ) : households.length === 0 ? (
                 <p className="py-6 text-sm text-zinc-500">
-                  No households yet. Add a family above to create their link.
+                  No households yet. Add a family to create their link.
                 </p>
               ) : (
                 households.map((household) => {
@@ -511,6 +451,7 @@ export function HouseholdsSection() {
                           <button
                             type="button"
                             onClick={() => {
+                              setErrorMessage("");
                               setAddGuestHouseholdId(household.id);
                               setAddGuestName("");
                               setAddGuestPrefix(emptyNamePrefixChoice());
@@ -528,48 +469,164 @@ export function HouseholdsSection() {
                           </button>
                         </div>
                       </div>
-                      {addGuestHouseholdId === household.id ? (
-                        <form
-                          className="mt-4 space-y-4"
-                          onSubmit={(event) => {
-                            event.preventDefault();
-                            void onAddNamedGuest(household);
-                          }}
-                        >
-                          <GuestNameFields
-                            compact
-                            prefix={addGuestPrefix}
-                            onPrefixChange={setAddGuestPrefix}
-                            fullName={addGuestName}
-                            onFullNameChange={setAddGuestName}
-                            namePlaceholder="Named guest"
-                          />
-                          <div className="flex flex-wrap gap-3">
-                            <button
-                              type="submit"
-                              className={adminPrimaryButtonClassName}
-                            >
-                              Save guest
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setAddGuestHouseholdId(null);
-                                setAddGuestName("");
-                                setAddGuestPrefix(emptyNamePrefixChoice());
-                              }}
-                              className={adminSecondaryButtonClassName}
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </form>
-                      ) : null}
                     </article>
                   );
                 })
               )}
             </div>
+
+            <AdminModal
+              open={formOpen}
+              title={mode === "edit" ? "Edit household" : "Add household"}
+              onClose={resetForm}
+            >
+              <form onSubmit={onSubmit} className="space-y-6">
+                <label className="block">
+                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                    Household label
+                  </span>
+                  <input
+                    required
+                    value={label}
+                    onChange={(event) => setLabel(event.target.value)}
+                    placeholder="The Santos Family"
+                    className={adminInputClassName}
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                    Plus-ones allowed
+                  </span>
+                  <input
+                    required
+                    type="number"
+                    min={0}
+                    max={10}
+                    value={plusOnesAllowed}
+                    onChange={(event) =>
+                      setPlusOnesAllowed(Number(event.target.value))
+                    }
+                    className={adminInputClassName}
+                  />
+                </label>
+
+                {mode === "create" ? (
+                  <fieldset className="space-y-6">
+                    <legend className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                      Named guests
+                    </legend>
+                    {namedGuests.map((guest, index) => (
+                      <GuestNameFields
+                        key={index}
+                        prefix={guest.prefix}
+                        onPrefixChange={(prefix) => {
+                          const next = [...namedGuests];
+                          next[index] = { ...next[index], prefix };
+                          setNamedGuests(next);
+                        }}
+                        fullName={guest.name}
+                        onFullNameChange={(name) => {
+                          const next = [...namedGuests];
+                          next[index] = { ...next[index], name };
+                          setNamedGuests(next);
+                        }}
+                        nameRequired={index === 0}
+                        namePlaceholder="Full name"
+                      />
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setNamedGuests((current) => [
+                          ...current,
+                          emptyNamedGuestDraft(),
+                        ])
+                      }
+                      className="text-sm underline underline-offset-4"
+                    >
+                      Add another named guest
+                    </button>
+                  </fieldset>
+                ) : null}
+
+                {errorMessage ? (
+                  <p className="text-sm text-red-700" role="alert">
+                    {errorMessage}
+                  </p>
+                ) : null}
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className={adminPrimaryButtonClassName}
+                  >
+                    {saving
+                      ? "Saving…"
+                      : mode === "edit"
+                        ? "Save household"
+                        : "Add household"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className={adminSecondaryButtonClassName}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </AdminModal>
+
+            <AdminModal
+              open={Boolean(addGuestHousehold)}
+              title={
+                addGuestHousehold
+                  ? `Add guest · ${addGuestHousehold.label}`
+                  : "Add guest"
+              }
+              onClose={closeAddGuest}
+            >
+              {addGuestHousehold ? (
+                <form
+                  className="space-y-4"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    void onAddNamedGuest(addGuestHousehold);
+                  }}
+                >
+                  <GuestNameFields
+                    compact
+                    prefix={addGuestPrefix}
+                    onPrefixChange={setAddGuestPrefix}
+                    fullName={addGuestName}
+                    onFullNameChange={setAddGuestName}
+                    namePlaceholder="Named guest"
+                  />
+                  {errorMessage ? (
+                    <p className="text-sm text-red-700" role="alert">
+                      {errorMessage}
+                    </p>
+                  ) : null}
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="submit"
+                      className={adminPrimaryButtonClassName}
+                    >
+                      Save guest
+                    </button>
+                    <button
+                      type="button"
+                      onClick={closeAddGuest}
+                      className={adminSecondaryButtonClassName}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : null}
+            </AdminModal>
           </>
         )}
       </div>

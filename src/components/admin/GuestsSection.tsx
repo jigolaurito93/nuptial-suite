@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { AdminModal } from "@/components/admin/AdminModal";
 import { GuestNameFields } from "@/components/admin/GuestNameFields";
 import {
   adminInputClassName,
@@ -132,6 +133,7 @@ export function GuestsSection() {
   const [newHouseholdLabel, setNewHouseholdLabel] = useState("");
   const [rsvpStatus, setRsvpStatus] = useState<InviteRsvpStatus>("pending");
   const [mode, setMode] = useState<FormMode>("create");
+  const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [reloadToken, setReloadToken] = useState(0);
@@ -252,6 +254,7 @@ export function GuestsSection() {
     setRsvpStatus("pending");
     setMode("create");
     setEditingId(null);
+    setFormOpen(false);
   }
 
   function reload() {
@@ -269,8 +272,21 @@ export function GuestsSection() {
     setPage(1);
   }
 
+  function openCreate() {
+    setErrorMessage("");
+    setFullName("");
+    setNamePrefix(emptyNamePrefixChoice());
+    setHouseholdId("");
+    setNewHouseholdLabel("");
+    setRsvpStatus("pending");
+    setMode("create");
+    setEditingId(null);
+    setFormOpen(true);
+  }
+
   function startEdit(guest: HeadcountPerson) {
     if (guest.isPlaceholder) return;
+    setErrorMessage("");
     setMode("edit");
     setEditingId(guest.id);
     setFullName(guest.fullName);
@@ -278,6 +294,7 @@ export function GuestsSection() {
     setHouseholdId(guest.householdId);
     setNewHouseholdLabel("");
     setRsvpStatus(guest.rsvpStatus);
+    setFormOpen(true);
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -411,94 +428,17 @@ export function GuestsSection() {
           </p>
         ) : (
           <>
-            <form onSubmit={onSubmit} className="mt-10 space-y-6">
-              <GuestNameFields
-                prefix={namePrefix}
-                onPrefixChange={setNamePrefix}
-                fullName={fullName}
-                onFullNameChange={setFullName}
-              />
+            <div className="mt-10">
+              <button
+                type="button"
+                onClick={openCreate}
+                className={adminPrimaryButtonClassName}
+              >
+                Add guest
+              </button>
+            </div>
 
-              {mode === "create" ? (
-                <>
-                  <label className="block">
-                    <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
-                      Household
-                    </span>
-                    <select
-                      value={householdId}
-                      onChange={(event) => setHouseholdId(event.target.value)}
-                      className={adminInputClassName}
-                    >
-                      <option value="">Create a new household</option>
-                      {households.map((household) => (
-                        <option key={household.id} value={household.id}>
-                          {household.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  {!householdId ? (
-                    <label className="block">
-                      <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
-                        New household label
-                      </span>
-                      <input
-                        required
-                        value={newHouseholdLabel}
-                        onChange={(event) =>
-                          setNewHouseholdLabel(event.target.value)
-                        }
-                        placeholder="The Santos Family"
-                        className={adminInputClassName}
-                      />
-                    </label>
-                  ) : null}
-                </>
-              ) : null}
-
-              <label className="block">
-                <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
-                  RSVP
-                </span>
-                <select
-                  value={rsvpStatus}
-                  onChange={(event) =>
-                    setRsvpStatus(event.target.value as InviteRsvpStatus)
-                  }
-                  className={adminInputClassName}
-                >
-                  <option value="pending">Pending</option>
-                  <option value="attending">Attending</option>
-                  <option value="declining">Declining</option>
-                </select>
-              </label>
-
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className={adminPrimaryButtonClassName}
-                >
-                  {saving
-                    ? "Saving…"
-                    : mode === "edit"
-                      ? "Save guest"
-                      : "Add guest"}
-                </button>
-                {mode === "edit" ? (
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className={adminSecondaryButtonClassName}
-                  >
-                    Cancel
-                  </button>
-                ) : null}
-              </div>
-            </form>
-
-            {errorMessage ? (
+            {errorMessage && !formOpen ? (
               <p className="mt-6 text-sm text-red-700" role="alert">
                 {errorMessage}
               </p>
@@ -651,7 +591,7 @@ export function GuestsSection() {
                   <p className="py-6 text-sm text-zinc-500">Loading guests…</p>
                 ) : headcountPeople.length === 0 ? (
                   <p className="py-6 text-sm text-zinc-500">
-                    No guests yet. Add a person above or create a household.
+                    No guests yet. Add a person or create a household.
                   </p>
                 ) : filteredGuests.length === 0 ? (
                   <p className="py-6 text-sm text-zinc-500">
@@ -711,6 +651,105 @@ export function GuestsSection() {
                 </div>
               ) : null}
             </div>
+
+            <AdminModal
+              open={formOpen}
+              title={mode === "edit" ? "Edit guest" : "Add guest"}
+              onClose={resetForm}
+            >
+              <form onSubmit={onSubmit} className="space-y-6">
+                <GuestNameFields
+                  prefix={namePrefix}
+                  onPrefixChange={setNamePrefix}
+                  fullName={fullName}
+                  onFullNameChange={setFullName}
+                />
+
+                {mode === "create" ? (
+                  <>
+                    <label className="block">
+                      <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                        Household
+                      </span>
+                      <select
+                        value={householdId}
+                        onChange={(event) =>
+                          setHouseholdId(event.target.value)
+                        }
+                        className={adminInputClassName}
+                      >
+                        <option value="">Create a new household</option>
+                        {households.map((household) => (
+                          <option key={household.id} value={household.id}>
+                            {household.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    {!householdId ? (
+                      <label className="block">
+                        <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                          New household label
+                        </span>
+                        <input
+                          required
+                          value={newHouseholdLabel}
+                          onChange={(event) =>
+                            setNewHouseholdLabel(event.target.value)
+                          }
+                          placeholder="The Santos Family"
+                          className={adminInputClassName}
+                        />
+                      </label>
+                    ) : null}
+                  </>
+                ) : null}
+
+                <label className="block">
+                  <span className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                    RSVP
+                  </span>
+                  <select
+                    value={rsvpStatus}
+                    onChange={(event) =>
+                      setRsvpStatus(event.target.value as InviteRsvpStatus)
+                    }
+                    className={adminInputClassName}
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="attending">Attending</option>
+                    <option value="declining">Declining</option>
+                  </select>
+                </label>
+
+                {errorMessage ? (
+                  <p className="text-sm text-red-700" role="alert">
+                    {errorMessage}
+                  </p>
+                ) : null}
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className={adminPrimaryButtonClassName}
+                  >
+                    {saving
+                      ? "Saving…"
+                      : mode === "edit"
+                        ? "Save guest"
+                        : "Add guest"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className={adminSecondaryButtonClassName}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </AdminModal>
           </>
         )}
       </div>
