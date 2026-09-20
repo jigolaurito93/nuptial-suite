@@ -5,7 +5,7 @@ import { hasSupabaseEnv } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AdminRoutePage() {
-  let displayName = invitation.couple.displayNames;
+  let displayName: string = invitation.couple.displayNames;
 
   if (hasSupabaseEnv()) {
     const supabase = await createClient();
