@@ -250,10 +250,6 @@ export function GuestsSection() {
     return filteredGuests.slice(start, start + pageSize);
   }, [currentPage, filteredGuests, pageSize]);
 
-  useEffect(() => {
-    setPage(1);
-  }, [familyFilter, rsvpFilter, kindFilter, pageSize]);
-
   function resetForm() {
     setFullName("");
     setNamePrefix(emptyNamePrefixChoice());
@@ -273,6 +269,7 @@ export function GuestsSection() {
     setFamilyFilter("");
     setRsvpFilter("all");
     setKindFilter("all");
+    setPage(1);
   }
 
   function onPageSizeChange(size: PageSize) {
@@ -415,9 +412,10 @@ export function GuestsSection() {
   }
 
   return (
-    <section id="guests" className={adminSectionClassName}>
+    <section className={adminSectionClassName}>
       <div className={adminSectionInnerClassName}>
         <AdminSectionHeading
+          heading="h1"
           eyebrow="Guests"
           title="Headcount"
           description="Every invited person, including reserved plus-one seats that have not been named yet. You can still change RSVPs here after the public deadline."
@@ -448,13 +446,14 @@ export function GuestsSection() {
             <div className="mt-12">
               <div className="grid gap-4 sm:grid-cols-3">
                 <label className="block">
-                  <span className={adminLabelClassName}>
-                    Family name
-                  </span>
+                  <span className={adminLabelClassName}>Family name</span>
                   <input
                     list="headcount-family-names"
                     value={familyFilter}
-                    onChange={(event) => setFamilyFilter(event.target.value)}
+                    onChange={(event) => {
+                      setFamilyFilter(event.target.value);
+                      setPage(1);
+                    }}
                     placeholder="All families"
                     className={adminInputClassName}
                   />
@@ -465,14 +464,13 @@ export function GuestsSection() {
                   </datalist>
                 </label>
                 <label className="block">
-                  <span className={adminLabelClassName}>
-                    RSVP
-                  </span>
+                  <span className={adminLabelClassName}>RSVP</span>
                   <select
                     value={rsvpFilter}
-                    onChange={(event) =>
-                      setRsvpFilter(event.target.value as RsvpFilter)
-                    }
+                    onChange={(event) => {
+                      setRsvpFilter(event.target.value as RsvpFilter);
+                      setPage(1);
+                    }}
                     className={adminInputClassName}
                   >
                     <option value="all">All statuses</option>
@@ -482,14 +480,13 @@ export function GuestsSection() {
                   </select>
                 </label>
                 <label className="block">
-                  <span className={adminLabelClassName}>
-                    Guest type
-                  </span>
+                  <span className={adminLabelClassName}>Guest type</span>
                   <select
                     value={kindFilter}
-                    onChange={(event) =>
-                      setKindFilter(event.target.value as KindFilter)
-                    }
+                    onChange={(event) => {
+                      setKindFilter(event.target.value as KindFilter);
+                      setPage(1);
+                    }}
                     className={adminInputClassName}
                   >
                     <option value="all">All guests</option>
@@ -554,9 +551,7 @@ export function GuestsSection() {
 
               <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className={adminLabelClassName}>
-                    Show
-                  </p>
+                  <p className={adminLabelClassName}>Show</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {PAGE_SIZE_OPTIONS.map((option) => {
                       const selected = pageSize === option.value;
@@ -671,14 +666,10 @@ export function GuestsSection() {
                 {mode === "create" ? (
                   <>
                     <label className="block">
-                      <span className={adminLabelClassName}>
-                        Household
-                      </span>
+                      <span className={adminLabelClassName}>Household</span>
                       <select
                         value={householdId}
-                        onChange={(event) =>
-                          setHouseholdId(event.target.value)
-                        }
+                        onChange={(event) => setHouseholdId(event.target.value)}
                         className={adminInputClassName}
                       >
                         <option value="">Create a new household</option>
@@ -709,9 +700,7 @@ export function GuestsSection() {
                 ) : null}
 
                 <label className="block">
-                  <span className={adminLabelClassName}>
-                    RSVP
-                  </span>
+                  <span className={adminLabelClassName}>RSVP</span>
                   <select
                     value={rsvpStatus}
                     onChange={(event) =>

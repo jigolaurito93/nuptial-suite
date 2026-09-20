@@ -164,7 +164,9 @@ export function RsvpForm({ invite, inviteCode, onSuccess }: RsvpFormProps) {
                   <span className="text-muted"> (plus-one)</span>
                 ) : null}
               </span>
-              <span className="text-muted">{statusLabel(guest.rsvpStatus)}</span>
+              <span className="text-muted">
+                {statusLabel(guest.rsvpStatus)}
+              </span>
             </li>
           ))}
         </ul>
@@ -184,8 +186,7 @@ export function RsvpForm({ invite, inviteCode, onSuccess }: RsvpFormProps) {
         {plusOneAllowanceCopy(invite.plusOnesAllowed, invite.label)}
       </p>
       <p className="text-center text-sm text-muted">
-        Invitation for{" "}
-        <span className="text-foreground">{invite.label}</span>
+        Invitation for <span className="text-foreground">{invite.label}</span>
       </p>
 
       <fieldset className="space-y-6">

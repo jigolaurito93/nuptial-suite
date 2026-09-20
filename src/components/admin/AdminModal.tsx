@@ -9,7 +9,12 @@ type AdminModalProps = {
   children: ReactNode;
 };
 
-export function AdminModal({ open, title, onClose, children }: AdminModalProps) {
+export function AdminModal({
+  open,
+  title,
+  onClose,
+  children,
+}: AdminModalProps) {
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement | null>(null);
   const onCloseRef = useRef(onClose);

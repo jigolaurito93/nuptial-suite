@@ -47,9 +47,7 @@ export function LoginForm() {
   return (
     <form onSubmit={onSubmit} className="mt-10 max-w-md space-y-6">
       <label className="block">
-        <span className={adminLabelClassName}>
-          Email
-        </span>
+        <span className={adminLabelClassName}>Email</span>
         <input
           required
           type="email"
@@ -61,9 +59,7 @@ export function LoginForm() {
       </label>
 
       <label className="block">
-        <span className={adminLabelClassName}>
-          Password
-        </span>
+        <span className={adminLabelClassName}>Password</span>
         <input
           required
           type="password"

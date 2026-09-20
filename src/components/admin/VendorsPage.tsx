@@ -317,7 +317,9 @@ export function VendorsPage() {
           .eq("id", payment.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("vendor_payments").insert(payload);
+        const { error } = await supabase
+          .from("vendor_payments")
+          .insert(payload);
         if (error) throw error;
       }
     }
@@ -430,7 +432,10 @@ export function VendorsPage() {
     }
 
     const supabase = createClient();
-    const { error } = await supabase.from("vendors").delete().eq("id", vendor.id);
+    const { error } = await supabase
+      .from("vendors")
+      .delete()
+      .eq("id", vendor.id);
     if (error) {
       setErrorMessage("Unable to delete this vendor.");
       return;
@@ -519,9 +524,7 @@ export function VendorsPage() {
 
             <div className="mt-8">
               <label className="block max-w-xs">
-                <span className={adminLabelClassName}>
-                  Role
-                </span>
+                <span className={adminLabelClassName}>Role</span>
                 <select
                   value={activeCategoryFilter}
                   onChange={(event) => setCategoryFilter(event.target.value)}
@@ -588,7 +591,9 @@ export function VendorsPage() {
                             </p>
                           ) : null}
                           {vendor.notes ? (
-                            <p className={`mt-3 max-w-xl ${adminMutedTextClassName}`}>
+                            <p
+                              className={`mt-3 max-w-xl ${adminMutedTextClassName}`}
+                            >
                               {vendor.notes}
                             </p>
                           ) : null}
@@ -635,9 +640,7 @@ export function VendorsPage() {
                               >
                                 <p
                                   className={
-                                    overdue
-                                      ? "text-red-800"
-                                      : "text-muted"
+                                    overdue ? "text-red-800" : "text-muted"
                                   }
                                 >
                                   {payment.label}
@@ -676,9 +679,7 @@ export function VendorsPage() {
             >
               <form onSubmit={onSubmit} className="space-y-6">
                 <label className="block">
-                  <span className={adminLabelClassName}>
-                    Role
-                  </span>
+                  <span className={adminLabelClassName}>Role</span>
                   <select
                     required
                     value={category}
@@ -698,13 +699,13 @@ export function VendorsPage() {
 
                 {category === OTHER_VENDOR_CATEGORY ? (
                   <label className="block">
-                    <span className={adminLabelClassName}>
-                      Custom role
-                    </span>
+                    <span className={adminLabelClassName}>Custom role</span>
                     <input
                       required
                       value={customCategory}
-                      onChange={(event) => setCustomCategory(event.target.value)}
+                      onChange={(event) =>
+                        setCustomCategory(event.target.value)
+                      }
                       placeholder="Videographer"
                       className={adminInputClassName}
                     />
@@ -712,9 +713,7 @@ export function VendorsPage() {
                 ) : null}
 
                 <label className="block">
-                  <span className={adminLabelClassName}>
-                    Company
-                  </span>
+                  <span className={adminLabelClassName}>Company</span>
                   <input
                     required
                     value={companyName}
@@ -725,9 +724,7 @@ export function VendorsPage() {
                 </label>
 
                 <label className="block">
-                  <span className={adminLabelClassName}>
-                    Contact person
-                  </span>
+                  <span className={adminLabelClassName}>Contact person</span>
                   <input
                     required
                     value={contactName}
@@ -738,9 +735,7 @@ export function VendorsPage() {
                 </label>
 
                 <label className="block">
-                  <span className={adminLabelClassName}>
-                    Phone
-                  </span>
+                  <span className={adminLabelClassName}>Phone</span>
                   <input
                     type="tel"
                     value={phone}
@@ -751,9 +746,7 @@ export function VendorsPage() {
                 </label>
 
                 <label className="block">
-                  <span className={adminLabelClassName}>
-                    Email
-                  </span>
+                  <span className={adminLabelClassName}>Email</span>
                   <input
                     type="email"
                     value={email}
@@ -764,9 +757,7 @@ export function VendorsPage() {
                 </label>
 
                 <label className="block">
-                  <span className={adminLabelClassName}>
-                    Description
-                  </span>
+                  <span className={adminLabelClassName}>Description</span>
                   <textarea
                     value={notes}
                     onChange={(event) => setNotes(event.target.value)}
@@ -777,9 +768,7 @@ export function VendorsPage() {
                 </label>
 
                 <label className="block">
-                  <span className={adminLabelClassName}>
-                    Status
-                  </span>
+                  <span className={adminLabelClassName}>Status</span>
                   <select
                     value={status}
                     onChange={(event) =>
@@ -794,9 +783,7 @@ export function VendorsPage() {
                 </label>
 
                 <label className="block">
-                  <span className={adminLabelClassName}>
-                    Contract total
-                  </span>
+                  <span className={adminLabelClassName}>Contract total</span>
                   <input
                     type="number"
                     min={0}
@@ -822,9 +809,7 @@ export function VendorsPage() {
                       className="space-y-4 border border-border bg-background px-4 py-4"
                     >
                       <label className="block">
-                        <span className={adminLabelClassName}>
-                          Label
-                        </span>
+                        <span className={adminLabelClassName}>Label</span>
                         <input
                           value={draft.label}
                           onChange={(event) =>
@@ -837,9 +822,7 @@ export function VendorsPage() {
                         />
                       </label>
                       <label className="block">
-                        <span className={adminLabelClassName}>
-                          Amount
-                        </span>
+                        <span className={adminLabelClassName}>Amount</span>
                         <input
                           type="number"
                           min={0}
@@ -855,9 +838,7 @@ export function VendorsPage() {
                       </label>
                       <div className="grid gap-4 sm:grid-cols-2">
                         <label className="block">
-                          <span className={adminLabelClassName}>
-                            Due date
-                          </span>
+                          <span className={adminLabelClassName}>Due date</span>
                           <input
                             type="date"
                             value={draft.dueOn}
@@ -870,9 +851,7 @@ export function VendorsPage() {
                           />
                         </label>
                         <label className="block">
-                          <span className={adminLabelClassName}>
-                            Paid date
-                          </span>
+                          <span className={adminLabelClassName}>Paid date</span>
                           <input
                             type="date"
                             value={draft.paidOn}

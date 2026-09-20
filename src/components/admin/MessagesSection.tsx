@@ -70,9 +70,10 @@ export function MessagesSection() {
   }
 
   return (
-    <section id="messages" className={adminSectionClassName}>
+    <section className={adminSectionClassName}>
       <div className={adminSectionInnerClassName}>
         <AdminSectionHeading
+          heading="h1"
           eyebrow="Messages"
           title="Well-wishes"
           description="Notes from visitors who opened the site without a personal invitation link. These are not RSVPs."
@@ -92,7 +93,9 @@ export function MessagesSection() {
 
             <div className={`mt-10 ${adminListClassName}`}>
               {loading ? (
-                <p className={`py-6 ${adminMutedTextClassName}`}>Loading notes…</p>
+                <p className={`py-6 ${adminMutedTextClassName}`}>
+                  Loading notes…
+                </p>
               ) : messages.length === 0 ? (
                 <p className={`py-6 ${adminMutedTextClassName}`}>
                   No well-wishes yet.

@@ -3,10 +3,7 @@ export type RsvpStatus = "attending" | "declining";
 export type InviteRsvpStatus = "pending" | "attending" | "declining";
 
 export type HouseholdRsvpStatus =
-  | "pending"
-  | "attending"
-  | "declining"
-  | "mixed";
+  "pending" | "attending" | "declining" | "mixed";
 
 export type PublicGuest = {
   id: string;

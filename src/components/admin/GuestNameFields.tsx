@@ -1,6 +1,9 @@
 "use client";
 
-import { adminInputClassName, adminLabelClassName } from "@/components/admin/formStyles";
+import {
+  adminInputClassName,
+  adminLabelClassName,
+} from "@/components/admin/formStyles";
 import {
   CUSTOM_PREFIX_VALUE,
   GUEST_PREFIX_OPTIONS,
@@ -34,9 +37,7 @@ export function GuestNameFields({
     <div className="space-y-3">
       {prefix.selected === CUSTOM_PREFIX_VALUE ? (
         <label className={compact ? "block max-w-xs" : "block"}>
-          <span className={adminLabelClassName}>
-            Custom prefix
-          </span>
+          <span className={adminLabelClassName}>Custom prefix</span>
           <input
             value={prefix.custom}
             onChange={(event) =>
@@ -50,9 +51,7 @@ export function GuestNameFields({
 
       <div className="flex min-w-0 flex-wrap gap-3 sm:flex-nowrap">
         <label className="block w-full shrink-0 sm:w-36">
-          <span className={adminLabelClassName}>
-            Prefix
-          </span>
+          <span className={adminLabelClassName}>Prefix</span>
           <select
             value={prefix.selected}
             onChange={(event) =>
@@ -74,9 +73,7 @@ export function GuestNameFields({
         </label>
 
         <label className="block min-w-0 flex-1">
-          <span className={adminLabelClassName}>
-            Full name
-          </span>
+          <span className={adminLabelClassName}>Full name</span>
           <input
             required={nameRequired}
             value={fullName}

@@ -118,7 +118,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const body = json && typeof json === "object" ? (json as Record<string, unknown>) : null;
+  const body =
+    json && typeof json === "object" ? (json as Record<string, unknown>) : null;
   const rawInviteCode =
     typeof body?.inviteCode === "string" ? body.inviteCode.trim() : "";
 

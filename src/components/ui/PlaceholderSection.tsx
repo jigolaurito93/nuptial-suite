@@ -1,5 +1,8 @@
 import { AdminSectionHeading } from "@/components/admin/AdminSectionHeading";
-import { adminSectionClassName, adminSectionInnerClassName } from "@/components/admin/formStyles";
+import {
+  adminSectionClassName,
+  adminSectionInnerClassName,
+} from "@/components/admin/formStyles";
 
 type PlaceholderSectionProps = {
   id?: string;

@@ -246,7 +246,9 @@ export function HouseholdsSection() {
       reload();
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Unable to save this household.",
+        error instanceof Error
+          ? error.message
+          : "Unable to save this household.",
       );
     } finally {
       setSaving(false);
@@ -339,9 +341,10 @@ export function HouseholdsSection() {
   }
 
   return (
-    <section id="households" className={adminSectionClassName}>
+    <section className={adminSectionClassName}>
       <div className={adminSectionInnerClassName}>
         <AdminSectionHeading
+          heading="h1"
           eyebrow="Households"
           title="Invitation cards"
           description="One household is one forever link. Named family members belong here; plus-ones are extra unnamed seats."
@@ -483,9 +486,7 @@ export function HouseholdsSection() {
             >
               <form onSubmit={onSubmit} className="space-y-6">
                 <label className="block">
-                  <span className={adminLabelClassName}>
-                    Household label
-                  </span>
+                  <span className={adminLabelClassName}>Household label</span>
                   <input
                     required
                     value={label}
@@ -496,9 +497,7 @@ export function HouseholdsSection() {
                 </label>
 
                 <label className="block">
-                  <span className={adminLabelClassName}>
-                    Plus-ones allowed
-                  </span>
+                  <span className={adminLabelClassName}>Plus-ones allowed</span>
                   <input
                     required
                     type="number"

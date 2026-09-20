@@ -52,11 +52,7 @@ export function clearInviteCookie() {
   document.cookie = `${INVITE_COOKIE_NAME}=;path=/;max-age=0;samesite=lax`;
 }
 
-const RSVP_STATUSES: InviteRsvpStatus[] = [
-  "pending",
-  "attending",
-  "declining",
-];
+const RSVP_STATUSES: InviteRsvpStatus[] = ["pending", "attending", "declining"];
 
 function isInviteRsvpStatus(value: unknown): value is InviteRsvpStatus {
   return (
@@ -93,13 +89,15 @@ function parseLookupGuests(value: unknown): PublicGuest[] {
   const rows = Array.isArray(value) ? value : [];
   return rows.flatMap((row) => {
     if (!row || typeof row !== "object") return [];
-    const guest = mapPublicGuest(row as {
-      id: unknown;
-      full_name: unknown;
-      name_prefix?: unknown;
-      is_plus_one: unknown;
-      rsvp_status: unknown;
-    });
+    const guest = mapPublicGuest(
+      row as {
+        id: unknown;
+        full_name: unknown;
+        name_prefix?: unknown;
+        is_plus_one: unknown;
+        rsvp_status: unknown;
+      },
+    );
     return guest ? [guest] : [];
   });
 }

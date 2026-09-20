@@ -93,8 +93,7 @@ export function formatDisplayDate(isoDate: string | null) {
 
 export function isVendorStatus(value: unknown): value is VendorStatus {
   return (
-    typeof value === "string" &&
-    VENDOR_STATUSES.includes(value as VendorStatus)
+    typeof value === "string" && VENDOR_STATUSES.includes(value as VendorStatus)
   );
 }
 

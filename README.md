@@ -52,20 +52,20 @@ Single-page experience with an envelope gate:
 2. Click the envelope — flap opens, scroll unlocks, optional background music starts.
 3. Sections below:
 
-| Section          | Anchor           |
-| ---------------- | ---------------- |
-| Save the date    | `#save-the-date` |
-| Countdown        | `#countdown`     |
-| Venue (+ hotels) | `#venue`         |
-| Program flow     | `#program`       |
-| Entourage        | `#entourage`     |
-| Dress code       | `#dress-code`    |
-| Gallery          | `#gallery`       |
-| Gift guide       | `#gift-guide`    |
-| RSVP (invite link only) | `#rsvp`   |
-| Well-wishes (no invite) | `#wishes` |
-| FAQs             | `#faqs`          |
-| See you there    | `#see-you-there` |
+| Section                 | Anchor           |
+| ----------------------- | ---------------- |
+| Save the date           | `#save-the-date` |
+| Countdown               | `#countdown`     |
+| Venue (+ hotels)        | `#venue`         |
+| Program flow            | `#program`       |
+| Entourage               | `#entourage`     |
+| Dress code              | `#dress-code`    |
+| Gallery                 | `#gallery`       |
+| Gift guide              | `#gift-guide`    |
+| RSVP (invite link only) | `#rsvp`          |
+| Well-wishes (no invite) | `#wishes`        |
+| FAQs                    | `#faqs`          |
+| See you there           | `#see-you-there` |
 
 Static copy lives in [`src/content/invitation.ts`](src/content/invitation.ts) (Kennett Ramos & Bea Alibutud).
 
@@ -81,8 +81,12 @@ Hero and gallery use Unsplash placeholders for now. Swap URLs in the content mod
 
 ## Couple admin
 
-- `/admin` — wedding planner (protected when Supabase env is set). Households creates invitation cards and copies unique links. Guests is the flat headcount. Messages lists well-wishes.
+- `/admin` — planner dashboard with clickable widgets (protected when Supabase env is set).
+- `/admin/households` — invitation cards and unique links.
+- `/admin/guests` — flat headcount.
+- `/admin/messages` — well-wishes.
 - `/admin/vendors` — vendor contacts, roles, and optional payment schedules (downpayment, remaining balance, due and paid dates).
+- `/admin/budget`, `/admin/tasks`, `/admin/invitation` — placeholders for later phases.
 - `/login` — couple email/password sign-in
 - `/auth/callback`
 

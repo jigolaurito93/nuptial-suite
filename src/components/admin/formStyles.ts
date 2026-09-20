@@ -13,7 +13,7 @@ export const adminSecondaryButtonClassName =
 export const adminLinkClassName =
   "text-sm text-muted underline decoration-border underline-offset-4 transition hover:text-foreground hover:decoration-accent";
 
-export const adminSectionClassName = "scroll-mt-28 border-t border-border";
+export const adminSectionClassName = "min-w-0";
 
 export const adminSectionInnerClassName = "mx-auto w-full max-w-3xl px-6 py-16";
 
