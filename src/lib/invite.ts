@@ -1,6 +1,8 @@
 import type {
   Guest,
   GuestRow,
+  GuestWithHousehold,
+  HeadcountPerson,
   Household,
   HouseholdRow,
   HouseholdRsvpStatus,
@@ -146,6 +148,92 @@ export function mapWellWishRow(row: WellWishRow): WellWish {
     message: row.message,
     contactNumber: row.contact_number,
     createdAt: row.created_at,
+  };
+}
+
+export const UNNAMED_PLUS_ONE_LABEL = "Plus-one (not yet named)";
+
+export function buildHeadcountPeople(
+  guests: GuestWithHousehold[],
+  households: Household[],
+): HeadcountPerson[] {
+  const people: HeadcountPerson[] = guests.map((guest) => ({
+    ...guest,
+    isPlaceholder: false,
+  }));
+
+  const plusOnesByHousehold = new Map<string, number>();
+  const namedByHousehold = new Map<string, GuestWithHousehold[]>();
+
+  for (const guest of guests) {
+    if (guest.isPlusOne) {
+      plusOnesByHousehold.set(
+        guest.householdId,
+        (plusOnesByHousehold.get(guest.householdId) ?? 0) + 1,
+      );
+      continue;
+    }
+
+    const named = namedByHousehold.get(guest.householdId) ?? [];
+    named.push(guest);
+    namedByHousehold.set(guest.householdId, named);
+  }
+
+  for (const household of households) {
+    const claimed = plusOnesByHousehold.get(household.id) ?? 0;
+    const unclaimed = Math.max(0, household.plusOnesAllowed - claimed);
+    if (unclaimed === 0) continue;
+
+    const named = namedByHousehold.get(household.id) ?? [];
+    const rsvpStatus: InviteRsvpStatus =
+      named.length > 0 &&
+      named.every((guest) => guest.rsvpStatus === "declining")
+        ? "declining"
+        : "pending";
+
+    for (let index = 0; index < unclaimed; index += 1) {
+      people.push({
+        id: `plus-one-slot:${household.id}:${index}`,
+        householdId: household.id,
+        fullName: UNNAMED_PLUS_ONE_LABEL,
+        namePrefix: null,
+        isPlusOne: true,
+        rsvpStatus,
+        createdAt: household.createdAt,
+        updatedAt: household.updatedAt,
+        householdLabel: household.label,
+        householdInviteCode: household.inviteCode,
+        isPlaceholder: true,
+      });
+    }
+  }
+
+  return people;
+}
+
+export function headcountSummary(people: HeadcountPerson[]) {
+  let named = 0;
+  let plusOneSeats = 0;
+  let pending = 0;
+  let attending = 0;
+  let declining = 0;
+
+  for (const person of people) {
+    if (person.isPlusOne) plusOneSeats += 1;
+    else named += 1;
+
+    if (person.rsvpStatus === "attending") attending += 1;
+    else if (person.rsvpStatus === "declining") declining += 1;
+    else pending += 1;
+  }
+
+  return {
+    invited: people.length,
+    named,
+    plusOneSeats,
+    pending,
+    attending,
+    declining,
   };
 }
 

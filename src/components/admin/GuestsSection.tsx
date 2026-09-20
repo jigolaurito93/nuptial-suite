@@ -16,6 +16,8 @@ import {
   type NamePrefixChoice,
 } from "@/lib/guest-name";
 import {
+  buildHeadcountPeople,
+  headcountSummary,
   mapGuestRow,
   mapHouseholdRow,
   rsvpStatusLabel,
@@ -25,6 +27,7 @@ import { createClient } from "@/lib/supabase/client";
 import type {
   GuestRow,
   GuestWithHousehold,
+  HeadcountPerson,
   Household,
   HouseholdRow,
   InviteRsvpStatus,
@@ -33,12 +36,86 @@ import type {
 type FormMode = "create" | "edit";
 type RsvpFilter = "all" | InviteRsvpStatus;
 type KindFilter = "all" | "named" | "plus-one";
+type PageSize = 10 | 25 | 50 | "all";
+
+const PAGE_SIZE_OPTIONS: { value: PageSize; label: string }[] = [
+  { value: 10, label: "10" },
+  { value: 25, label: "25" },
+  { value: 50, label: "50" },
+  { value: "all", label: "All" },
+];
+
+const compactControlClassName =
+  "border border-zinc-300 px-3 py-2 text-xs tracking-[0.18em] uppercase disabled:opacity-40 dark:border-zinc-700";
+
+const compactSelectClassName =
+  "border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 outline-none focus:border-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-zinc-50";
 
 function guestCountLabel(visible: number, total: number, filtered: boolean) {
   if (!filtered) {
     return `${visible} ${visible === 1 ? "guest" : "guests"}`;
   }
   return `${visible} of ${total} ${total === 1 ? "guest" : "guests"}`;
+}
+
+function pageCountFor(size: PageSize, total: number) {
+  if (size === "all" || total === 0) return 1;
+  return Math.max(1, Math.ceil(total / size));
+}
+
+function pageRangeLabel(page: number, size: PageSize, total: number) {
+  if (total === 0) return "";
+  if (size === "all") {
+    return `Showing ${total} ${total === 1 ? "guest" : "guests"}`;
+  }
+  const start = (page - 1) * size + 1;
+  const end = Math.min(page * size, total);
+  return `Showing ${start}–${end} of ${total}`;
+}
+
+function HeadcountPager({
+  page,
+  pageCount,
+  onPageChange,
+}: {
+  page: number;
+  pageCount: number;
+  onPageChange: (page: number) => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <button
+        type="button"
+        disabled={page <= 1}
+        onClick={() => onPageChange(page - 1)}
+        className={compactControlClassName}
+      >
+        Previous
+      </button>
+      <label className="flex items-center gap-2 text-sm text-zinc-500">
+        <span className="text-xs tracking-[0.18em] uppercase">Page</span>
+        <select
+          value={page}
+          onChange={(event) => onPageChange(Number(event.target.value))}
+          className={compactSelectClassName}
+        >
+          {Array.from({ length: pageCount }, (_, index) => (
+            <option key={index + 1} value={index + 1}>
+              Page {index + 1}
+            </option>
+          ))}
+        </select>
+      </label>
+      <button
+        type="button"
+        disabled={page >= pageCount}
+        onClick={() => onPageChange(page + 1)}
+        className={compactControlClassName}
+      >
+        Next
+      </button>
+    </div>
+  );
 }
 
 export function GuestsSection() {
@@ -61,6 +138,8 @@ export function GuestsSection() {
   const [familyFilter, setFamilyFilter] = useState("");
   const [rsvpFilter, setRsvpFilter] = useState<RsvpFilter>("all");
   const [kindFilter, setKindFilter] = useState<KindFilter>("all");
+  const [pageSize, setPageSize] = useState<PageSize>(10);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     if (!configured) return;
@@ -114,17 +193,29 @@ export function GuestsSection() {
   }, [configured, reloadToken]);
 
   const familyNames = useMemo(() => {
-    return [...new Set(guests.map((guest) => guest.householdLabel))].sort(
-      (left, right) => left.localeCompare(right),
-    );
-  }, [guests]);
+    const labels = new Set([
+      ...guests.map((guest) => guest.householdLabel),
+      ...households.map((household) => household.label),
+    ]);
+    return [...labels].sort((left, right) => left.localeCompare(right));
+  }, [guests, households]);
+
+  const headcountPeople = useMemo(
+    () => buildHeadcountPeople(guests, households),
+    [guests, households],
+  );
+
+  const summary = useMemo(
+    () => headcountSummary(headcountPeople),
+    [headcountPeople],
+  );
 
   const filtersActive =
     familyFilter.trim() !== "" || rsvpFilter !== "all" || kindFilter !== "all";
 
   const filteredGuests = useMemo(() => {
     const familyQuery = familyFilter.trim().toLowerCase();
-    return guests.filter((guest) => {
+    return headcountPeople.filter((guest) => {
       if (
         familyQuery &&
         !guest.householdLabel.toLowerCase().includes(familyQuery)
@@ -138,7 +229,20 @@ export function GuestsSection() {
       if (kindFilter === "plus-one" && !guest.isPlusOne) return false;
       return true;
     });
-  }, [familyFilter, guests, kindFilter, rsvpFilter]);
+  }, [familyFilter, headcountPeople, kindFilter, rsvpFilter]);
+
+  const pageCount = pageCountFor(pageSize, filteredGuests.length);
+  const currentPage = Math.min(page, pageCount);
+  const showPager = pageSize !== "all" && pageCount > 1;
+  const pagedGuests = useMemo(() => {
+    if (pageSize === "all") return filteredGuests;
+    const start = (currentPage - 1) * pageSize;
+    return filteredGuests.slice(start, start + pageSize);
+  }, [currentPage, filteredGuests, pageSize]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [familyFilter, rsvpFilter, kindFilter, pageSize]);
 
   function resetForm() {
     setFullName("");
@@ -160,7 +264,13 @@ export function GuestsSection() {
     setKindFilter("all");
   }
 
-  function startEdit(guest: GuestWithHousehold) {
+  function onPageSizeChange(size: PageSize) {
+    setPageSize(size);
+    setPage(1);
+  }
+
+  function startEdit(guest: HeadcountPerson) {
+    if (guest.isPlaceholder) return;
     setMode("edit");
     setEditingId(guest.id);
     setFullName(guest.fullName);
@@ -247,7 +357,8 @@ export function GuestsSection() {
     }
   }
 
-  async function onDelete(guest: GuestWithHousehold) {
+  async function onDelete(guest: HeadcountPerson) {
+    if (guest.isPlaceholder) return;
     if (!guest.isPlusOne) {
       const namedCount = guests.filter(
         (row) => row.householdId === guest.householdId && !row.isPlusOne,
@@ -289,8 +400,9 @@ export function GuestsSection() {
           Headcount
         </h2>
         <p className="mt-4 max-w-xl text-zinc-600 dark:text-zinc-400">
-          Every person on the list, including plus-ones. You can still change
-          RSVPs here after the public deadline.
+          Every invited person, including reserved plus-one seats that have not
+          been named yet. You can still change RSVPs here after the public
+          deadline.
         </p>
 
         {!configured ? (
@@ -446,16 +558,48 @@ export function GuestsSection() {
                 </label>
               </div>
 
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                <p className="text-sm text-zinc-500">
-                  {loading
-                    ? "Counting guests…"
-                    : guestCountLabel(
-                        filteredGuests.length,
-                        guests.length,
-                        filtersActive,
-                      )}
-                </p>
+              <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
+                <div className="space-y-1 text-sm text-zinc-500">
+                  {loading ? (
+                    <p>Counting guests…</p>
+                  ) : (
+                    <>
+                      <p>
+                        Invited {summary.invited}
+                        {" · "}
+                        {summary.named} named
+                        {" · "}
+                        {summary.plusOneSeats} plus-one{" "}
+                        {summary.plusOneSeats === 1 ? "seat" : "seats"}
+                      </p>
+                      <p>
+                        Pending {summary.pending}
+                        {" · "}
+                        Attending {summary.attending}
+                        {" · "}
+                        Declining {summary.declining}
+                      </p>
+                      {filtersActive ? (
+                        <p>
+                          {guestCountLabel(
+                            filteredGuests.length,
+                            headcountPeople.length,
+                            true,
+                          )}
+                        </p>
+                      ) : null}
+                      {!loading && filteredGuests.length > 0 ? (
+                        <p>
+                          {pageRangeLabel(
+                            currentPage,
+                            pageSize,
+                            filteredGuests.length,
+                          )}
+                        </p>
+                      ) : null}
+                    </>
+                  )}
+                </div>
                 {filtersActive ? (
                   <button
                     type="button"
@@ -467,10 +611,45 @@ export function GuestsSection() {
                 ) : null}
               </div>
 
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs tracking-[0.18em] text-zinc-500 uppercase">
+                    Show
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {PAGE_SIZE_OPTIONS.map((option) => {
+                      const selected = pageSize === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => onPageSizeChange(option.value)}
+                          className={
+                            selected
+                              ? `${compactControlClassName} border-zinc-950 bg-zinc-950 text-white dark:border-zinc-50 dark:bg-zinc-50 dark:text-zinc-950`
+                              : compactControlClassName
+                          }
+                        >
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                {showPager ? (
+                  <HeadcountPager
+                    page={currentPage}
+                    pageCount={pageCount}
+                    onPageChange={setPage}
+                  />
+                ) : null}
+              </div>
+
               <div className="mt-4 divide-y divide-zinc-200 border-y border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
                 {loading ? (
                   <p className="py-6 text-sm text-zinc-500">Loading guests…</p>
-                ) : guests.length === 0 ? (
+                ) : headcountPeople.length === 0 ? (
                   <p className="py-6 text-sm text-zinc-500">
                     No guests yet. Add a person above or create a household.
                   </p>
@@ -479,7 +658,7 @@ export function GuestsSection() {
                     No guests match these filters.
                   </p>
                 ) : (
-                  filteredGuests.map((guest) => (
+                  pagedGuests.map((guest) => (
                     <article key={guest.id} className="py-6">
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
@@ -495,29 +674,42 @@ export function GuestsSection() {
                             {guest.isPlusOne ? "Plus-one" : "Named guest"}
                             {" · "}
                             {rsvpStatusLabel(guest.rsvpStatus)}
+                            {guest.isPlaceholder ? " · Reserved seat" : null}
                           </p>
                         </div>
-                        <div className="flex flex-wrap gap-3 text-sm">
-                          <button
-                            type="button"
-                            onClick={() => startEdit(guest)}
-                            className="underline underline-offset-4"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => void onDelete(guest)}
-                            className="underline underline-offset-4"
-                          >
-                            Delete
-                          </button>
-                        </div>
+                        {guest.isPlaceholder ? null : (
+                          <div className="flex flex-wrap gap-3 text-sm">
+                            <button
+                              type="button"
+                              onClick={() => startEdit(guest)}
+                              className="underline underline-offset-4"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void onDelete(guest)}
+                              className="underline underline-offset-4"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </article>
                   ))
                 )}
               </div>
+
+              {showPager ? (
+                <div className="mt-6">
+                  <HeadcountPager
+                    page={currentPage}
+                    pageCount={pageCount}
+                    onPageChange={setPage}
+                  />
+                </div>
+              ) : null}
             </div>
           </>
         )}

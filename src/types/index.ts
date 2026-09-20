@@ -83,6 +83,10 @@ export type GuestWithHousehold = Guest & {
   householdInviteCode: string;
 };
 
+export type HeadcountPerson = GuestWithHousehold & {
+  isPlaceholder: boolean;
+};
+
 export type WellWish = {
   id: string;
   fullName: string;
