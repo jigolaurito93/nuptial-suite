@@ -9,7 +9,7 @@ The guest invitation is the primary experience on `/`. Admin remains a scaffold 
 - [Next.js](https://nextjs.org) (App Router, TypeScript)
 - [Tailwind CSS](https://tailwindcss.com)
 - [pnpm](https://pnpm.io)
-- [Supabase](https://supabase.com) (RSVP storage; auth for admin later)
+- [Supabase](https://supabase.com) (RSVPs, unique invite links, couple login)
 - [Resend](https://resend.com) (email, not wired yet)
 - [Google Maps](https://developers.google.com/maps) (venue map embed, not wired yet — venues use Maps search links)
 
@@ -21,7 +21,7 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The invitation runs without API keys. RSVP submissions need Supabase configured (see below). Admin auth redirects only after Supabase env vars are set.
+Open [http://localhost:3000](http://localhost:3000). The invitation runs without API keys. RSVP submissions, plus-one allowances, and admin login need Supabase configured (see below).
 
 ## Environment variables
 
@@ -34,14 +34,15 @@ Copy `.env.example` to `.env.local` and fill in values when you are ready to con
 | `RESEND_API_KEY`                  | Transactional email (later) |
 | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Venue map embed (later)     |
 
-### Supabase RSVP setup
+### Supabase setup
 
 1. Create a Supabase project.
-2. In the SQL editor, run [`supabase/migrations/001_rsvps.sql`](supabase/migrations/001_rsvps.sql).
-3. Copy the project URL and anon key into `.env.local`.
-4. Restart `pnpm dev`.
+2. In the SQL editor, run [`supabase/migrations/001_rsvps.sql`](supabase/migrations/001_rsvps.sql), then [`supabase/migrations/002_invites.sql`](supabase/migrations/002_invites.sql).
+3. Copy the project URL and anon `public` key into `.env.local`.
+4. Authentication → enable Email. Add one user for the couple (email + password).
+5. Restart `pnpm dev`.
 
-RLS allows anonymous inserts (public RSVP form) and authenticated selects (for a future admin guest list).
+Anonymous guests can submit an RSVP and look up a single invite by code. They cannot list the guest table. The couple signs in at `/login` to manage invitations and plus-ones.
 
 ## Guest invitation (`/`)
 
@@ -67,6 +68,8 @@ Single-page experience with an envelope gate:
 
 Static copy lives in [`src/content/invitation.ts`](src/content/invitation.ts) (Kennett Ramos & Bea Alibutud).
 
+Personal invite links use `/?invite=CODE`. When the code matches an invitation, RSVP and the plus-one FAQ show that household’s allowance. Without a code, the form stays anonymous (no plus-ones).
+
 ### Audio
 
 Place a royalty-free piano minus-one at `public/audio/save-the-date.mp3`. Playback starts after the envelope opens. If the file is missing, the player fails silently. Use the fixed “Music on/off” control to mute.
@@ -77,13 +80,14 @@ Hero and gallery use Unsplash placeholders for now. Swap URLs in the content mod
 
 ## Couple admin
 
-- `/admin` — wedding planner scaffold (protected when Supabase env is set)
-- `/login` — couple sign-in
+- `/admin` — wedding planner (protected when Supabase env is set). Guests section creates invitations, sets plus-ones, and copies unique links.
+- `/login` — couple email/password sign-in
 - `/auth/callback`
 
 ## API
 
-- `POST /api/rsvp` — validates and inserts into `public.rsvps`
+- `GET /api/invite?code=` — public payload for one invitation
+- `POST /api/rsvp` — anonymous insert into `public.rsvps`, or invite RSVP via `submit_invite_rsvp`
 - `POST /api/emails` — stub (Resend later)
 
 ## Scripts

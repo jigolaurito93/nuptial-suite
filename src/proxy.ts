@@ -9,7 +9,7 @@ import {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (pathname.startsWith("/admin")) {
+  if (pathname.startsWith("/admin") || pathname.startsWith("/login")) {
     return updateSession(request);
   }
 
@@ -31,5 +31,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin", "/admin/:path*", "/api/:path*"],
+  matcher: ["/admin", "/admin/:path*", "/login", "/api/:path*"],
 };

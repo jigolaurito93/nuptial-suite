@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SignOutButton } from "@/components/admin/SignOutButton";
 
 const links = [
   { href: "#overview", label: "Overview" },
@@ -32,6 +33,7 @@ export function AdminNav() {
           >
             Public site
           </Link>
+          <SignOutButton />
         </nav>
       </div>
     </header>

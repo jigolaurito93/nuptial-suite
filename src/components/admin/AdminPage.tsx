@@ -1,4 +1,5 @@
 import { AdminNav } from "@/components/admin/AdminNav";
+import { GuestInvitesSection } from "@/components/admin/GuestInvitesSection";
 import { PlaceholderSection } from "@/components/ui";
 
 export function AdminPage() {
@@ -12,11 +13,7 @@ export function AdminPage() {
           title="Wedding planner"
           description="Private workspace for the bride and groom. Upcoming tasks, RSVP counts, and budget snapshot will live here."
         />
-        <PlaceholderSection
-          id="guests"
-          title="Guests"
-          description="Guest list, plus-ones, and meal choices. CRUD will be added after the data model is in place."
-        />
+        <GuestInvitesSection />
         <PlaceholderSection
           id="budget"
           title="Budget"

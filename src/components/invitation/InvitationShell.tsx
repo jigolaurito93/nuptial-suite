@@ -12,9 +12,13 @@ const InvitationPage = dynamic(async () => {
 
 type InvitationShellProps = {
   initiallyUnlocked: boolean;
+  inviteCode?: string | null;
 };
 
-export function InvitationShell({ initiallyUnlocked }: InvitationShellProps) {
+export function InvitationShell({
+  initiallyUnlocked,
+  inviteCode = null,
+}: InvitationShellProps) {
   const [unlocked, setUnlocked] = useState(initiallyUnlocked);
   const [invitationReady, setInvitationReady] = useState(initiallyUnlocked);
 
@@ -37,7 +41,7 @@ export function InvitationShell({ initiallyUnlocked }: InvitationShellProps) {
             ? { inert: true as const, "aria-hidden": true as const }
             : {})}
         >
-          <InvitationPage />
+          <InvitationPage inviteCode={inviteCode} />
         </div>
       ) : null}
       <AnimatePresence>

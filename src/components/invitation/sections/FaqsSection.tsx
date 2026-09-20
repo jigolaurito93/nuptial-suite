@@ -3,15 +3,31 @@
 import { useState } from "react";
 import { invitation } from "@/content/invitation";
 import { SectionHeading } from "@/components/invitation/SectionHeading";
+import { plusOneAllowanceCopy } from "@/lib/invite";
+import type { PublicInvite } from "@/types";
 
-export function FaqsSection() {
+type FaqsSectionProps = {
+  invite?: PublicInvite | null;
+};
+
+export function FaqsSection({ invite }: FaqsSectionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const faqs = invitation.faqs.map((faq) => {
+    if (faq.question !== "Can I bring a guest/date?" || !invite) {
+      return faq;
+    }
+
+    return {
+      ...faq,
+      answer: plusOneAllowanceCopy(invite.plusOnesAllowed, invite.displayName),
+    };
+  });
 
   return (
     <section id="faqs" className="invitation-section px-6 py-24">
       <SectionHeading eyebrow="Helpful notes" title="FAQs" />
       <div className="mx-auto mt-14 max-w-2xl divide-y divide-border border-y border-border">
-        {invitation.faqs.map((faq, index) => {
+        {faqs.map((faq, index) => {
           const isOpen = openIndex === index;
           return (
             <div key={faq.question}>

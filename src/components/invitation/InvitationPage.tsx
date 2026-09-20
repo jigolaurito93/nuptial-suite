@@ -19,8 +19,14 @@ import {
   SeeYouThereSection,
 } from "@/components/invitation/sections/SeeYouThereSection";
 import { VenueSection } from "@/components/invitation/sections/VenueSection";
+import { usePublicInvite } from "@/components/invitation/usePublicInvite";
 
-export function InvitationPage() {
+type InvitationPageProps = {
+  inviteCode?: string | null;
+};
+
+export function InvitationPage({ inviteCode = null }: InvitationPageProps) {
+  const { invite, loading, refresh } = usePublicInvite(inviteCode);
   const [opened, setOpened] = useState(false);
   const [muted, setMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -67,8 +73,13 @@ export function InvitationPage() {
           <DressCodeSection />
           <GallerySection />
           <GiftGuideSection />
-          <RsvpSection />
-          <FaqsSection />
+          <RsvpSection
+            invite={invite}
+            inviteCode={invite ? inviteCode : null}
+            loading={loading}
+            onSuccess={refresh}
+          />
+          <FaqsSection invite={invite} />
           <SeeYouThereSection />
         </main>
         <InvitationFooter />
