@@ -13,7 +13,14 @@ import {
   mapWellWishRow,
 } from "@/lib/invite";
 import { createClient } from "@/lib/supabase/client";
-import { mapPlanningTaskRow, tasksOverview } from "@/lib/tasks";
+import {
+  compareOpenTasks,
+  isTaskDone,
+  isTaskOverdue,
+  mapPlanningTaskRow,
+  taskDueCopy,
+  tasksOverview,
+} from "@/lib/tasks";
 import {
   compareVendors,
   formatDisplayDate,
@@ -184,7 +191,7 @@ function VendorPreviewCard({
   );
 }
 
-export function AdminPage() {
+export function AdminPage({ displayName }: { displayName: string }) {
   const configured = hasSupabaseEnv();
   const [households, setHouseholds] = useState<Household[]>([]);
   const [guests, setGuests] = useState<GuestWithHousehold[]>([]);
@@ -304,6 +311,14 @@ export function AdminPage() {
     () => tasksOverview(tasks, today),
     [tasks, today],
   );
+  const previewTasks = useMemo(
+    () =>
+      tasks
+        .filter((task) => !isTaskDone(task))
+        .sort((left, right) => compareOpenTasks(left, right, today))
+        .slice(0, 5),
+    [tasks, today],
+  );
   const bookedVendors = vendors.filter(
     (vendor) => vendor.status === "booked" || vendor.status === "completed",
   ).length;
@@ -329,7 +344,7 @@ export function AdminPage() {
               <div className="min-w-0">
                 <WidgetEyebrow>Welcome</WidgetEyebrow>
                 <h1 className="font-display mt-3 text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
-                  Hello {invitation.couple.displayNames}
+                  Hello {displayName}
                 </h1>
                 <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted">
                   {invitation.weddingDateLabel}
@@ -348,16 +363,16 @@ export function AdminPage() {
                 />
               </div>
             </div>
-            <div className="mt-6 flex flex-wrap gap-4 text-[0.65rem] tracking-[0.18em] uppercase">
+            <div className="mt-6 flex flex-wrap items-center gap-4 text-[0.65rem] tracking-[0.18em] uppercase">
               <Link
                 href="/"
-                className="border border-navy bg-navy px-4 py-2 text-background transition hover:bg-transparent hover:text-navy"
+                className="rounded-lg border border-navy bg-navy px-4 py-2 text-background transition hover:bg-transparent hover:text-navy"
               >
                 View invitation
               </Link>
               <Link
                 href="/admin/invitation"
-                className="text-muted underline decoration-border underline-offset-4 transition hover:text-foreground hover:decoration-accent"
+                className="inline-flex items-center px-0 py-2 text-muted underline decoration-border underline-offset-4 transition hover:text-foreground hover:decoration-accent"
               >
                 Invitation editor
               </Link>
@@ -493,6 +508,58 @@ export function AdminPage() {
           </WidgetLink>
 
           <WidgetLink
+            href="/admin/tasks"
+            label="Open tasks"
+            className="h-full bg-accent-soft/80 md:col-span-2 xl:col-span-4 xl:row-span-2"
+          >
+            <WidgetEyebrow>Tasks</WidgetEyebrow>
+            <WidgetValue>{display(taskOverview.openCount)}</WidgetValue>
+            <WidgetDetail>
+              {loading
+                ? "Open checklist items"
+                : taskOverview.overdueCount > 0
+                  ? `${taskOverview.overdueCount} overdue · ${taskOverview.doneCount} done`
+                  : taskOverview.next
+                    ? `Next: ${taskOverview.next.title}`
+                    : tasks.length === 0
+                      ? "No checklist yet"
+                      : "All caught up"}
+            </WidgetDetail>
+            {loading ? (
+              <div className="mt-6 space-y-3">
+                {Array.from({ length: 4 }, (_, index) => (
+                  <div
+                    key={index}
+                    className="h-10 animate-pulse rounded-lg bg-surface/80"
+                  />
+                ))}
+              </div>
+            ) : previewTasks.length > 0 ? (
+              <ul className="mt-6 divide-y divide-border border-y border-border">
+                {previewTasks.map((task) => {
+                  const overdue = isTaskOverdue(task, today);
+                  const dueCopy = taskDueCopy(task, today);
+                  return (
+                    <li key={task.id} className="py-3">
+                      <p className="truncate text-sm text-foreground">
+                        {task.title}
+                      </p>
+                      <p
+                        className={`mt-1 truncate text-xs ${
+                          overdue ? "text-red-800" : "text-muted"
+                        }`}
+                      >
+                        {task.category}
+                        {dueCopy ? ` · ${dueCopy}` : ""}
+                      </p>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : null}
+          </WidgetLink>
+
+          <WidgetLink
             href="/admin/guests"
             label="Open RSVP breakdown"
             className="xl:col-span-4"
@@ -575,29 +642,9 @@ export function AdminPage() {
           </WidgetLink>
 
           <WidgetLink
-            href="/admin/tasks"
-            label="Open tasks"
-            className="xl:col-span-2"
-          >
-            <WidgetEyebrow>Tasks</WidgetEyebrow>
-            <WidgetValue>{display(taskOverview.openCount)}</WidgetValue>
-            <WidgetDetail>
-              {loading
-                ? "Open checklist items"
-                : taskOverview.overdueCount > 0
-                  ? `${taskOverview.overdueCount} overdue`
-                  : taskOverview.next
-                    ? `Next: ${taskOverview.next.title}`
-                    : tasks.length === 0
-                      ? "No checklist yet"
-                      : "All caught up"}
-            </WidgetDetail>
-          </WidgetLink>
-
-          <WidgetLink
             href="/admin/invitation"
             label="Open invitation editor"
-            className="xl:col-span-2"
+            className="xl:col-span-4"
           >
             <WidgetEyebrow>Invitation</WidgetEyebrow>
             <p className="font-display mt-3 text-2xl font-medium tracking-tight text-foreground">
