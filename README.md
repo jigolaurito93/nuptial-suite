@@ -37,7 +37,7 @@ Copy `.env.example` to `.env.local` and fill in values when you are ready to con
 ### Supabase setup
 
 1. Create a Supabase project.
-2. In the SQL editor, run [`supabase/migrations/001_rsvps.sql`](supabase/migrations/001_rsvps.sql), then [`supabase/migrations/002_invites.sql`](supabase/migrations/002_invites.sql), then [`supabase/migrations/003_households_guests.sql`](supabase/migrations/003_households_guests.sql), then [`supabase/migrations/004_guest_name_prefix.sql`](supabase/migrations/004_guest_name_prefix.sql).
+2. In the SQL editor, run [`supabase/migrations/001_rsvps.sql`](supabase/migrations/001_rsvps.sql), then [`supabase/migrations/002_invites.sql`](supabase/migrations/002_invites.sql), then [`supabase/migrations/003_households_guests.sql`](supabase/migrations/003_households_guests.sql), then [`supabase/migrations/004_guest_name_prefix.sql`](supabase/migrations/004_guest_name_prefix.sql), then [`supabase/migrations/005_vendors.sql`](supabase/migrations/005_vendors.sql).
 3. Copy the project URL and anon `public` key into `.env.local`. Do not use a service-role key.
 4. Authentication → enable Email. Add one user for the couple (email + password).
 5. Restart `pnpm dev`.
@@ -82,6 +82,7 @@ Hero and gallery use Unsplash placeholders for now. Swap URLs in the content mod
 ## Couple admin
 
 - `/admin` — wedding planner (protected when Supabase env is set). Households creates invitation cards and copies unique links. Guests is the flat headcount. Messages lists well-wishes.
+- `/admin/vendors` — vendor contacts, roles, and optional payment schedules (downpayment, remaining balance, due and paid dates).
 - `/login` — couple email/password sign-in
 - `/auth/callback`
 

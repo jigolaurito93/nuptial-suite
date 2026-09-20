@@ -127,3 +127,59 @@ export type AdminSection = {
   title: string;
   description: string;
 };
+
+export type VendorStatus = "inquiry" | "booked" | "completed";
+
+export type VendorPayment = {
+  id: string;
+  vendorId: string;
+  label: string;
+  amount: number;
+  dueOn: string | null;
+  paidOn: string | null;
+  sortOrder: number;
+  createdAt: string;
+};
+
+export type VendorPaymentRow = {
+  id: string;
+  vendor_id: string;
+  label: string;
+  amount: number | string;
+  due_on: string | null;
+  paid_on: string | null;
+  sort_order: number;
+  created_at: string;
+};
+
+export type Vendor = {
+  id: string;
+  category: string;
+  companyName: string;
+  contactName: string;
+  phone: string | null;
+  email: string | null;
+  notes: string | null;
+  status: VendorStatus;
+  contractAmount: number | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type VendorRow = {
+  id: string;
+  category: string;
+  company_name: string;
+  contact_name: string;
+  phone: string | null;
+  email: string | null;
+  notes: string | null;
+  status: VendorStatus;
+  contract_amount: number | string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type VendorWithPayments = Vendor & {
+  payments: VendorPayment[];
+};

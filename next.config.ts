@@ -17,7 +17,11 @@ const nextConfig: NextConfig = {
       { source: "/rsvp", destination: "/#rsvp", permanent: false },
       { source: "/registry", destination: "/#gift-guide", permanent: false },
       { source: "/planner", destination: "/admin", permanent: false },
-      { source: "/planner/:path*", destination: "/admin", permanent: false },
+      {
+        source: "/planner/:path*",
+        destination: "/admin/:path*",
+        permanent: false,
+      },
     ];
   },
 };
