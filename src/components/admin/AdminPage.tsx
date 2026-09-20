@@ -13,6 +13,7 @@ import {
   mapWellWishRow,
 } from "@/lib/invite";
 import { createClient } from "@/lib/supabase/client";
+import { mapPlanningTaskRow, tasksOverview } from "@/lib/tasks";
 import {
   compareVendors,
   formatDisplayDate,
@@ -29,6 +30,8 @@ import type {
   GuestWithHousehold,
   Household,
   HouseholdRow,
+  PlanningTask,
+  PlanningTaskRow,
   VendorPaymentRow,
   VendorRow,
   VendorWithPayments,
@@ -187,6 +190,7 @@ export function AdminPage() {
   const [guests, setGuests] = useState<GuestWithHousehold[]>([]);
   const [messages, setMessages] = useState<WellWish[]>([]);
   const [vendors, setVendors] = useState<VendorWithPayments[]>([]);
+  const [tasks, setTasks] = useState<PlanningTask[]>([]);
   const [loading, setLoading] = useState(configured);
   const daysLeft = daysUntilWedding();
 
@@ -213,54 +217,74 @@ export function AdminPage() {
         .from("vendors")
         .select("*, vendor_payments(*)")
         .order("created_at", { ascending: false }),
-    ]).then(([householdResult, guestResult, messageResult, vendorResult]) => {
-      if (cancelled) return;
+      supabase
+        .from("planning_tasks")
+        .select("*")
+        .order("created_at", { ascending: false }),
+    ]).then(
+      ([
+        householdResult,
+        guestResult,
+        messageResult,
+        vendorResult,
+        taskResult,
+      ]) => {
+        if (cancelled) return;
 
-      if (
-        householdResult.error ||
-        guestResult.error ||
-        messageResult.error ||
-        vendorResult.error
-      ) {
-        setHouseholds([]);
-        setGuests([]);
-        setMessages([]);
-        setVendors([]);
-        setLoading(false);
-        return;
-      }
-
-      const guestRows = (guestResult.data ?? []) as Array<
-        GuestRow & {
-          households: { label: string; invite_code: string } | null;
+        if (
+          householdResult.error ||
+          guestResult.error ||
+          messageResult.error ||
+          vendorResult.error
+        ) {
+          setHouseholds([]);
+          setGuests([]);
+          setMessages([]);
+          setVendors([]);
+          setTasks([]);
+          setLoading(false);
+          return;
         }
-      >;
 
-      setHouseholds(
-        ((householdResult.data ?? []) as HouseholdRow[]).map(mapHouseholdRow),
-      );
-      setGuests(
-        guestRows.map((row) => ({
-          ...mapGuestRow(row),
-          householdLabel: row.households?.label ?? "Unknown household",
-          householdInviteCode: row.households?.invite_code ?? "",
-        })),
-      );
-      setMessages(
-        ((messageResult.data ?? []) as WellWishRow[]).map(mapWellWishRow),
-      );
-      setVendors(
-        (
-          (vendorResult.data ?? []) as Array<
-            VendorRow & { vendor_payments: VendorPaymentRow[] | null }
-          >
-        ).map((row) => ({
-          ...mapVendorRow(row),
-          payments: (row.vendor_payments ?? []).map(mapVendorPaymentRow),
-        })),
-      );
-      setLoading(false);
-    });
+        const guestRows = (guestResult.data ?? []) as Array<
+          GuestRow & {
+            households: { label: string; invite_code: string } | null;
+          }
+        >;
+
+        setHouseholds(
+          ((householdResult.data ?? []) as HouseholdRow[]).map(mapHouseholdRow),
+        );
+        setGuests(
+          guestRows.map((row) => ({
+            ...mapGuestRow(row),
+            householdLabel: row.households?.label ?? "Unknown household",
+            householdInviteCode: row.households?.invite_code ?? "",
+          })),
+        );
+        setMessages(
+          ((messageResult.data ?? []) as WellWishRow[]).map(mapWellWishRow),
+        );
+        setVendors(
+          (
+            (vendorResult.data ?? []) as Array<
+              VendorRow & { vendor_payments: VendorPaymentRow[] | null }
+            >
+          ).map((row) => ({
+            ...mapVendorRow(row),
+            payments: (row.vendor_payments ?? []).map(mapVendorPaymentRow),
+          })),
+        );
+        setTasks(
+          taskResult.error
+            ? []
+            : ((taskResult.data ?? []) as PlanningTaskRow[]).map(
+                mapPlanningTaskRow,
+              ),
+        );
+        setLoading(false);
+      },
+    );
 
     return () => {
       cancelled = true;
@@ -275,6 +299,10 @@ export function AdminPage() {
   const overview = useMemo(
     () => vendorsOverview(vendors, today),
     [today, vendors],
+  );
+  const taskOverview = useMemo(
+    () => tasksOverview(tasks, today),
+    [tasks, today],
   );
   const bookedVendors = vendors.filter(
     (vendor) => vendor.status === "booked" || vendor.status === "completed",
@@ -552,8 +580,18 @@ export function AdminPage() {
             className="xl:col-span-2"
           >
             <WidgetEyebrow>Tasks</WidgetEyebrow>
-            <WidgetValue>—</WidgetValue>
-            <WidgetDetail>Checklist coming in a later phase.</WidgetDetail>
+            <WidgetValue>{display(taskOverview.openCount)}</WidgetValue>
+            <WidgetDetail>
+              {loading
+                ? "Open checklist items"
+                : taskOverview.overdueCount > 0
+                  ? `${taskOverview.overdueCount} overdue`
+                  : taskOverview.next
+                    ? `Next: ${taskOverview.next.title}`
+                    : tasks.length === 0
+                      ? "No checklist yet"
+                      : "All caught up"}
+            </WidgetDetail>
           </WidgetLink>
 
           <WidgetLink

@@ -180,3 +180,29 @@ export type VendorRow = {
 export type VendorWithPayments = Vendor & {
   payments: VendorPayment[];
 };
+
+export type TaskOwner = "shared" | "partner_one" | "partner_two";
+
+export type PlanningTask = {
+  id: string;
+  title: string;
+  notes: string | null;
+  category: string;
+  owner: TaskOwner;
+  dueOn: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PlanningTaskRow = {
+  id: string;
+  title: string;
+  notes: string | null;
+  category: string;
+  owner: string;
+  due_on: string | null;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+};

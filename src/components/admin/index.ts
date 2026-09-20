@@ -5,4 +5,5 @@ export { GuestsSection } from "./GuestsSection";
 export { HouseholdsSection } from "./HouseholdsSection";
 export { MessagesSection } from "./MessagesSection";
 export { SignOutButton } from "./SignOutButton";
+export { TasksPage } from "./TasksPage";
 export { VendorsPage } from "./VendorsPage";
